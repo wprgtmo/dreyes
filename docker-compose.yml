@@ -1,34 +1,35 @@
 #version: '3.8'
 services:
   web:
-    container_name: odoo_dreyes_18
-    image: odoo:18.0
+    container_name: ${ODOO_CONTAINER_NAME}
+    image: ${ODOO_IMAGE}
     depends_on:
       - db
     ports:
-      - "80:8069"
+      - "${ODOO_PORT}:8069"
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./config:/etc/odoo
       - ./addons:/mnt/extra-addons
       - ./logs:/var/log/odoo
     environment:
-      - HOST=db
-      - USER=odoo
-      - PASSWORD=myodoo
+      HOST: ${DB_HOST}
+      USER: ${DB_USER}
+      PASSWORD: ${DB_PASSWORD}      
+    command: odoo -d dreyes -u dom_portal   
   db:
-    container_name: postgres_dreyes_18
-    image: postgres:latest
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    image: ${POSTGRES_IMAGE}
     restart: always
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=myodoo
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: ${PGDATA}
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
+      - odoo-db-data:${PGDATA}
 
 volumes:
   odoo-web-data:
