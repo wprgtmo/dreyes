@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_dreyes_portal" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.dreyes.portal</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='website_info_settings']" position="after">
+                <block title="Layout de login y registro" id="dreyes_portal_auth_layout" invisible="not website_id">
+                    <setting string="Logo" help="Logo mostrado en el panel izquierdo del login y registro. Si esta vacio se usa el logo incluido en el modulo.">
+                        <field name="dreyes_auth_logo" widget="image" class="oe_avatar bg-view"/>
+                    </setting>
+                    <setting string="Colores" help="Usa valores HEX, por ejemplo #f31922.">
+                        <div class="content-group">
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Rojo inicial" for="dreyes_auth_panel_start"/>
+                                <field name="dreyes_auth_panel_start" widget="color" placeholder="#f31922"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Rojo final" for="dreyes_auth_panel_end"/>
+                                <field name="dreyes_auth_panel_end" widget="color" placeholder="#d0111d"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Color secundario" for="dreyes_auth_accent"/>
+                                <field name="dreyes_auth_accent" widget="color" placeholder="#302678"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Fondo exterior" for="dreyes_auth_background"/>
+                                <field name="dreyes_auth_background" widget="color" placeholder="#d8d5d2"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Frases del panel" help="Textos del panel visual izquierdo.">
+                        <div class="content-group">
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Bienvenida" for="dreyes_auth_welcome"/>
+                                <field name="dreyes_auth_welcome"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Frase principal" for="dreyes_auth_tagline"/>
+                                <field name="dreyes_auth_tagline"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Texto inferior izquierdo" for="dreyes_auth_footer_left"/>
+                                <field name="dreyes_auth_footer_left"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Texto inferior derecho" for="dreyes_auth_footer_right"/>
+                                <field name="dreyes_auth_footer_right"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Textos de formularios" help="Titulos y subtitulos para login y registro.">
+                        <div class="content-group">
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Titulo login" for="dreyes_auth_login_title"/>
+                                <field name="dreyes_auth_login_title"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Subtitulo login" for="dreyes_auth_login_subtitle"/>
+                                <field name="dreyes_auth_login_subtitle"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Titulo registro" for="dreyes_auth_signup_title"/>
+                                <field name="dreyes_auth_signup_title"/>
+                            </div>
+                            <div class="row mt8">
+                                <label class="col-lg-4" string="Subtitulo registro" for="dreyes_auth_signup_subtitle"/>
+                                <field name="dreyes_auth_signup_subtitle"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

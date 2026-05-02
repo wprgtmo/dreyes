@@ -1,0 +1,132 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dreyes_portal
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20251121\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-17 23:06+0000\n"
+"PO-Revision-Date: 2026-03-17 23:06+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "Bienvenido a la Mesa"
+msgstr "Welcome to the Table"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "CONFIRMAR CONTRASEÑA"
+msgstr "CONFIRM PASSWORD"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "CONTRASEÑA"
+msgstr "PASSWORD"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "CORREO ELECTRONICO"
+msgstr "EMAIL"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Crea tu cuenta"
+msgstr "Create your account"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "Crear nueva cuenta"
+msgstr "Create new account"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_auth_base_layout
+msgid "Deporte Ciencia"
+msgstr "Sport Science"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "ENTRAR"
+msgstr "ENTER"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Ej. Juan Perez"
+msgstr "Ex. Juan Perez"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_auth_base_layout
+msgid "Estrategia &amp; Precision"
+msgstr "Strategy &amp; Precision"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "Has olvidado tu contraseña?"
+msgstr "Have you forgotten your password?"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "Inicia sesión para continuar tu racha."
+msgstr "Log in to continue your streak."
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "Iniciar con"
+msgstr "Start with"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Iniciar sesión"
+msgstr "Login"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_auth_base_layout
+msgid "Logo"
+msgstr "Logo"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "REGISTRARSE"
+msgstr "REGISTER"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_auth_base_layout
+msgid "SmartDomino"
+msgstr "SmartDomino"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "TU NOMBRE"
+msgstr "YOUR NAME"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_login
+msgid "USUARIO"
+msgstr "USER"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Unete a la comunidad de SmartDomino."
+msgstr "Join the SmartDomino community."
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Volver al inicio"
+msgstr "Back to top"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "Ya tienes una cuenta?"
+msgstr "Do you already have an account?"
+
+#. module: dreyes_portal
+#: model_terms:ir.ui.view,arch_db:dreyes_portal.portal_web_signup
+msgid "nombre@ejemplo.com"
+msgstr "name@example.com"

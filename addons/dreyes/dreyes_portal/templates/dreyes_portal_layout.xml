@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_auth_base_layout" name="DReyes Portal Auth Layout">
+        <t t-set="auth_website" t-value="request.website"/>
+        <t t-set="auth_logo_url" t-value="'/web/image/website/%s/dreyes_auth_logo' % auth_website.id if auth_website.dreyes_auth_logo else '/dreyes_portal/static/src/img/logo_dreyes.png'"/>
+        <div class="sd_full_screen_auth container-fluid p-0 m-0"
+             t-att-style="'--dreyes-panel-start: %s; --dreyes-panel-end: %s; --dreyes-purple: %s; --dreyes-purple-dark: %s; --dreyes-auth-bg: %s; --dreyes-logo-url: url(%s);' % (
+                auth_website.dreyes_auth_panel_start or '#f31922',
+                auth_website.dreyes_auth_panel_end or '#d0111d',
+                auth_website.dreyes_auth_accent or '#302678',
+                auth_website.dreyes_auth_accent or '#302678',
+                auth_website.dreyes_auth_background or '#d8d5d2',
+                auth_logo_url
+             )">
+            <div class="sd_auth_card">
+                <div class="sd_panel_left">
+                    <p class="sd_welcome">
+                        <t t-esc="auth_website.dreyes_auth_welcome or 'Bienvenido a'"/>
+                    </p>
+                    <div class="sd_logo_badge">
+                        <div class="sd_logo_mark" role="img" aria-label="DReyes Latin Market"/>
+                    </div>
+                    <p class="sd_tagline">
+                        <t t-esc="auth_website.dreyes_auth_tagline or 'En el lugar de tu corazon.'"/>
+                    </p>
+                    <div class="sd_panel_links">
+                        <span><t t-esc="auth_website.dreyes_auth_footer_left or 'Latin Market'"/></span>
+                        <span><t t-esc="auth_website.dreyes_auth_footer_right or 'Productos y sabores'"/></span>
+                    </div>
+                    <div class="sd_wave_edge"/>
+                </div>
+
+                <div class="sd_panel_right">
+                    <div class="sd_form_container">
+                        <div class="sd_header_login_section">
+                            <h2>
+                                <t t-esc="auth_title"/>
+                            </h2>
+                            <p>
+                                <t t-esc="auth_subtitle"/>
+                            </p>
+                        </div>
+
+                        <t t-out="0"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

@@ -215,6 +215,8 @@ odoo.conf
 pg-web/
 ../addons/*
 addons/*
+!addons/dreyes/
+!addons/dreyes/**
 *.pem
 pyrightconfig.json
 addons/custom_title_and_favicon
