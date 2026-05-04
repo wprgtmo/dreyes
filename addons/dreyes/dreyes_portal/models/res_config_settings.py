@@ -5,6 +5,7 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    signup_form_type = fields.Selection(related="company_id.signup_form_type", readonly=False)
     dreyes_auth_logo = fields.Image(related="website_id.dreyes_auth_logo", readonly=False)
     dreyes_auth_panel_start = fields.Char(related="website_id.dreyes_auth_panel_start", readonly=False)
     dreyes_auth_panel_end = fields.Char(related="website_id.dreyes_auth_panel_end", readonly=False)

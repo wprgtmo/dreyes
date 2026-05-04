@@ -21,6 +21,7 @@
         "templates/dreyes_portal_layout.xml",
         "templates/dreyes_login.xml",
         "templates/dreyes_register.xml",
+        "templates/dreyes_profile_complete.xml",
     ],
     
     "assets": {

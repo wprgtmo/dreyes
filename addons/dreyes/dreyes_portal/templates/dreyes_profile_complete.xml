@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_profile_complete" name="Completar perfil DReyes">
+        <t t-call="web.frontend_layout">
+            <div id="wrap" class="sd_profile_page">
+                <div class="container py-5">
+                    <div class="sd_profile_form_shell mx-auto">
+                        <h1 class="sd_profile_title"><t>Completa tu perfil</t></h1>
+                        <p class="sd_profile_subtitle"><t>Necesitamos estos datos para habilitar tu cuenta.</t></p>
+
+                        <form class="sd_profile_form" role="form" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                            <p class="alert alert-danger" t-if="error" role="alert">
+                                <t t-esc="error"/>
+                            </p>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="first_name" class="form-label fw-bold sd_text_blue small"><t>First name</t></label>
+                                    <input type="text" name="first_name" t-att-value="first_name" id="first_name" class="form-control form-control-lg sd_input" required="required" autofocus="autofocus"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="last_name" class="form-label fw-bold sd_text_blue small"><t>Last name</t></label>
+                                    <input type="text" name="last_name" t-att-value="last_name" id="last_name" class="form-control form-control-lg sd_input" required="required"/>
+                                </div>
+
+
+                                <div class="col-12">
+                                    <label for="street" class="form-label fw-bold sd_text_blue small"><t>Street Address</t></label>
+                                    <input type="text" name="street" t-att-value="street" id="street" class="form-control form-control-lg sd_input" required="required"/>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="street2" class="form-label fw-bold sd_text_blue small"><t>Street Address Line 2</t></label>
+                                    <input type="text" name="street2" t-att-value="street2" id="street2" class="form-control form-control-lg sd_input"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label fw-bold sd_text_blue small"><t>City</t></label>
+                                    <input type="text" name="city" t-att-value="city" id="city" class="form-control form-control-lg sd_input" required="required"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="state_id" class="form-label fw-bold sd_text_blue small"><t>Region/State/Province</t></label>
+                                    <select name="state_id" id="state_id" class="form-select form-control form-control-lg sd_input" required="required">
+                                        <option value=""></option>
+                                        <t t-foreach="states" t-as="state">
+                                            <option t-att-value="state.id" t-att-selected="'selected' if str(state.id) == state_id else None">
+                                                <t t-esc="state.name"/>
+                                                <t t-if="state.country_id">, <t t-esc="state.country_id.name"/></t>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="zip" class="form-label fw-bold sd_text_blue small"><t>Postal / Zip code</t></label>
+                                    <input type="text" name="zip" t-att-value="zip" id="zip" class="form-control form-control-lg sd_input" required="required"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="country_id" class="form-label fw-bold sd_text_blue small"><t>Country</t></label>
+                                    <select name="country_id" id="country_id" class="form-select form-control form-control-lg sd_input" required="required">
+                                        <option value=""></option>
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id" t-att-selected="'selected' if str(country.id) == country_id else None">
+                                                <t t-esc="country.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="tax_permit" class="form-label fw-bold sd_text_blue small sd_upload_label"><t>TEXAS SALES AND USE TAX PERMIT</t></label>
+                                    <label for="tax_permit" class="sd_upload_button">
+                                        <span><t>UPLOAD FILE</t></span>
+                                        <span class="sd_upload_plus">+</span>
+                                    </label>
+                                    <input type="file" name="tax_permit" id="tax_permit" class="sd_file_input" accept=".pdf,.jpg,.jpeg,.png"/>
+                                    <p class="text-muted small mb-0"><t>Upload supported file (Max 15MB)</t></p>
+                                </div>
+
+                                <div class="col-12 sd_phone_row">
+                                    <div class="sd_phone_code">
+                                        <label for="phone_code" class="form-label fw-bold sd_text_blue small"><t>Code</t></label>
+                                        <select name="phone_code" id="phone_code" class="form-select form-control form-control-lg sd_input" required="required">
+                                            <t t-foreach="phone_countries" t-as="phone_country">
+                                                <option t-att-value="phone_country.phone_code" t-att-selected="'selected' if str(phone_country.phone_code) == (phone_code or '1') else None">
+                                                    <t t-esc="phone_country.code"/> +<t t-esc="phone_country.phone_code"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="sd_phone_number">
+                                        <label for="phone" class="form-label fw-bold sd_text_blue small"><t>Phone</t></label>
+                                        <input type="tel" name="phone" t-att-value="phone" id="phone" class="form-control form-control-lg sd_input" required="required"/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check sd_checkbox_row">
+                                        <input type="checkbox" name="join_community" id="join_community" class="form-check-input" value="1" t-att-checked="'checked' if join_community else None"/>
+                                        <label for="join_community" class="form-check-label"><t>Join the community</t></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold sd_btn_blue shadow-sm"><t>GUARDAR PERFIL</t></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

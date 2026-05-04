@@ -7,6 +7,9 @@
         <field name="arch" type="xml">
             <xpath expr="//block[@id='website_info_settings']" position="after">
                 <block title="Layout de login y registro" id="dreyes_portal_auth_layout" invisible="not website_id">
+                    <setting string="Formulario de registro" help="Basico conserva el registro actual. Extendido mantiene el registro basico y solicita direccion, telefono y permiso fiscal al primer inicio de sesion.">
+                        <field name="signup_form_type" widget="radio"/>
+                    </setting>
                     <setting string="Logo" help="Logo mostrado en el panel izquierdo del login y registro. Si esta vacio se usa el logo incluido en el modulo.">
                         <field name="dreyes_auth_logo" widget="image" class="oe_avatar bg-view"/>
                     </setting>

@@ -217,6 +217,8 @@ pg-web/
 addons/*
 !addons/dreyes/
 !addons/dreyes/**
+addons/dreyes/**/__pycache__/
+addons/dreyes/**/*.py[codz]
 *.pem
 pyrightconfig.json
 addons/custom_title_and_favicon
