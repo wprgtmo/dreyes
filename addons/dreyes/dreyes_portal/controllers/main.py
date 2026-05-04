@@ -55,8 +55,9 @@ class DomPortalRedirectMixin:
 
     def _get_company_signup_form_type(self):
         website = getattr(request, "website", False)
-        company = website.company_id if website else request.env.company
-        return company.signup_form_type or "basic"
+        if website:
+            return website.signup_form_type or website.company_id.signup_form_type or "basic"
+        return request.env.company.signup_form_type or "basic"
 
     def _requires_profile_completion(self, user):
         if self._get_company_signup_form_type() != "extended" or user._is_public():
