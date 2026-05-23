@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_dreyes_dist" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.dreyes.dist</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='website_info_settings']" position="after">
+                <block title="Registro extendido DReyes" id="dreyes_dist_signup_settings" invisible="not website_id">
+                    <setting string="Formulario de registro" help="Basico conserva login y registro simples. Extendido solicita direccion, telefono y permiso fiscal en el primer acceso.">
+                        <field name="signup_form_type" widget="radio"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,11 +1,12 @@
 # `dreyes_portal`
 
-Modulo de entrada al portal web de DReyes.
+Modulo de acceso web para DReyes.
 
 ## Incluye
 
 - templates de login;
 - templates de registro;
+- branding configurable del acceso;
 - helpers de redireccion para entrada publica, login y signup;
 - ruta raiz del portal.
 
@@ -13,12 +14,13 @@ Modulo de entrada al portal web de DReyes.
 
 - `base`
 - `web`
+- `website`
 - `auth_signup`
-- `dreyes_permission`
 
 ## Notas
 
-- Centraliza la logica de destino inicial del usuario segun perfil activo y partida activa.
-- Debe probarse siempre junto con creacion de usuario, perfil por defecto y sincronizacion de grupos.
+- Redirige a usuarios publicos al login.
+- Tras login o signup devuelve al usuario autenticado al home del sitio.
+- El formulario extendido fue separado al modulo `dreyes_dist`.
 
-Documentacion ampliada en `../docs/modulos/dreyes_portal.md`.
+Documentacion ampliada en `doc/README_TECNICO.md`.

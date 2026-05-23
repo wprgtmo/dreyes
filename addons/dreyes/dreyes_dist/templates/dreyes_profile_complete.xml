@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="portal_profile_complete" name="Completar perfil DReyes">
+    <template id="portal_profile_complete" name="Completar perfil DReyes Dist">
         <t t-call="web.frontend_layout">
             <div id="wrap" class="sd_profile_page">
                 <div class="container py-5">
@@ -25,7 +25,6 @@
                                     <label for="last_name" class="form-label fw-bold sd_text_blue small"><t>Last name</t></label>
                                     <input type="text" name="last_name" t-att-value="last_name" id="last_name" class="form-control form-control-lg sd_input" required="required"/>
                                 </div>
-
 
                                 <div class="col-12">
                                     <label for="street" class="form-label fw-bold sd_text_blue small"><t>Street Address</t></label>
@@ -98,6 +97,7 @@
                                         <input type="tel" name="phone" t-att-value="phone" id="phone" class="form-control form-control-lg sd_input" required="required"/>
                                     </div>
                                 </div>
+
                                 <div class="col-12">
                                     <div class="form-check sd_checkbox_row">
                                         <input type="checkbox" name="join_community" id="join_community" class="form-check-input" value="1" t-att-checked="'checked' if join_community else None"/>

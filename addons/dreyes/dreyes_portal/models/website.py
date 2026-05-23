@@ -5,14 +5,6 @@ from odoo import fields, models
 class Website(models.Model):
     _inherit = "website"
 
-    signup_form_type = fields.Selection(
-        selection=[
-            ("basic", "Basico"),
-            ("extended", "Extendido"),
-        ],
-        string="Formulario de registro",
-        default="basic",
-    )
     dreyes_auth_logo = fields.Image(string="Logo del login/registro", max_width=1024, max_height=512)
     dreyes_auth_panel_start = fields.Char(string="Rojo inicial", default="#f31922")
     dreyes_auth_panel_end = fields.Char(string="Rojo final", default="#d0111d")

@@ -2,7 +2,7 @@
 {
     "name": "Dreyes Portal",
 
-    "summary": "Entrada del portal con login, registro y redirecciones.",
+    "summary": "Entrada del portal con login, registro y branding del acceso.",
     
     "version": "18.0.1.0.0",
     "author": "Wilfredo",
@@ -21,7 +21,6 @@
         "templates/dreyes_portal_layout.xml",
         "templates/dreyes_login.xml",
         "templates/dreyes_register.xml",
-        "templates/dreyes_profile_complete.xml",
     ],
     
     "assets": {
