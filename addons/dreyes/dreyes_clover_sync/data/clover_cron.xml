@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_clover_process_events" model="ir.cron">
+        <field name="name">Clover: procesar eventos</field>
+        <field name="model_id" ref="model_clover_sync_event"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_events()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
+    <record id="ir_cron_clover_nightly_reconcile" model="ir.cron">
+        <field name="name">Clover: conciliación nocturna</field>
+        <field name="model_id" ref="model_clover_connector"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_nightly_reconcile()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).replace(hour=3, minute=0, second=0)"/>
+        <field name="active">True</field>
+    </record>
+</odoo>

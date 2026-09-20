@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clover_connector_operator,clover.connector operator,model_clover_connector,dreyes_clover_sync.group_clover_operator,1,0,0,0
+access_clover_connector_manager,clover.connector manager,model_clover_connector,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_event_operator,clover.sync.event operator,model_clover_sync_event,dreyes_clover_sync.group_clover_operator,1,1,0,0
+access_clover_event_manager,clover.sync.event manager,model_clover_sync_event,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_map_operator,clover.object.map operator,model_clover_object_map,dreyes_clover_sync.group_clover_operator,1,0,0,0
+access_clover_map_manager,clover.object.map manager,model_clover_object_map,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_binding_operator,clover.product.binding operator,model_clover_product_binding,dreyes_clover_sync.group_clover_operator,1,1,1,0
+access_clover_binding_manager,clover.product.binding manager,model_clover_product_binding,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_tender_operator,clover.tender.map operator,model_clover_tender_map,dreyes_clover_sync.group_clover_operator,1,1,1,0
+access_clover_tender_manager,clover.tender.map manager,model_clover_tender_map,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_modifier_group_operator,clover.modifier.group operator,model_clover_modifier_group,dreyes_clover_sync.group_clover_operator,1,1,1,0
+access_clover_modifier_group_manager,clover.modifier.group manager,model_clover_modifier_group,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_modifier_operator,clover.modifier operator,model_clover_modifier,dreyes_clover_sync.group_clover_operator,1,1,1,0
+access_clover_modifier_manager,clover.modifier manager,model_clover_modifier,dreyes_clover_sync.group_clover_manager,1,1,1,1
+access_clover_conflict_operator,clover.sync.conflict operator,model_clover_sync_conflict,dreyes_clover_sync.group_clover_operator,1,1,0,0
+access_clover_conflict_manager,clover.sync.conflict manager,model_clover_sync_conflict,dreyes_clover_sync.group_clover_manager,1,1,1,1

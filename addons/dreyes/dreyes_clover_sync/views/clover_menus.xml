@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_clover_root" name="Clover" sequence="55" groups="dreyes_clover_sync.group_clover_operator"/>
+    <menuitem id="menu_clover_connectors" name="Conexiones" parent="menu_clover_root" action="action_clover_connectors" sequence="10" groups="dreyes_clover_sync.group_clover_manager"/>
+    <menuitem id="menu_clover_operations" name="Operaciones" parent="menu_clover_root" sequence="20"/>
+    <menuitem id="menu_clover_events" name="Eventos" parent="menu_clover_operations" action="action_clover_events" sequence="10"/>
+    <menuitem id="menu_clover_conflicts" name="Conflictos" parent="menu_clover_operations" action="action_clover_conflicts" sequence="20"/>
+    <menuitem id="menu_clover_configuration" name="Configuración" parent="menu_clover_root" sequence="30"/>
+    <menuitem id="menu_clover_products" name="Productos" parent="menu_clover_configuration" action="action_clover_product_bindings" sequence="10"/>
+    <menuitem id="menu_clover_tenders" name="Métodos de pago" parent="menu_clover_configuration" action="action_clover_tender_maps" sequence="20"/>
+    <menuitem id="menu_clover_modifiers" name="Modificadores" parent="menu_clover_configuration" action="action_clover_modifier_groups" sequence="30"/>
+    <menuitem id="menu_clover_maps" name="Asociaciones" parent="menu_clover_configuration" action="action_clover_object_maps" sequence="40" groups="dreyes_clover_sync.group_clover_manager"/>
+</odoo>

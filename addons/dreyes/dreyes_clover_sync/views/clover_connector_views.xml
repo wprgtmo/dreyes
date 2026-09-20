@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_clover_connector_list" model="ir.ui.view">
+        <field name="name">clover.connector.list</field>
+        <field name="model">clover.connector</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'connected'" decoration-danger="state == 'error'" decoration-muted="state == 'paused'">
+                <field name="name"/><field name="company_id" groups="base.group_multi_company"/>
+                <field name="environment"/><field name="merchant_id"/><field name="state" widget="badge"/>
+                <field name="last_catalog_sync"/><field name="last_stock_sync"/><field name="last_order_sync"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_clover_connector_form" model="ir.ui.view">
+        <field name="name">clover.connector.form</field>
+        <field name="model">clover.connector</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_connect_oauth" type="object" string="Conectar OAuth" class="oe_highlight" invisible="state == 'connected'" groups="dreyes_clover_sync.group_clover_manager"/>
+                    <button name="action_test_connection" type="object" string="Probar conexión" invisible="state != 'connected'"/>
+                    <button name="action_initial_import" type="object" string="Importar desde Clover" invisible="state != 'connected'"/>
+                    <button name="action_publish_catalog" type="object" string="Publicar catálogo" invisible="state != 'connected' or not initial_import_done"/>
+                    <button name="action_reconcile" type="object" string="Conciliar" invisible="state != 'connected'"/>
+                    <button name="action_pause" type="object" string="Pausar" invisible="state != 'connected'"/>
+                    <button name="action_resume" type="object" string="Reanudar" invisible="state != 'paused'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected,paused,error"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="action" name="%(action_clover_events)d" class="oe_stat_button" icon="fa-exchange">
+                            <field name="event_count" widget="statinfo" string="Eventos"/>
+                        </button>
+                        <button type="action" name="%(action_clover_conflicts)d" class="oe_stat_button" icon="fa-warning">
+                            <field name="conflict_count" widget="statinfo" string="Conflictos"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Sandbox" bg_color="text-bg-warning" invisible="environment != 'sandbox'"/>
+                    <group>
+                        <group string="Conexión">
+                            <field name="name"/><field name="company_id" groups="base.group_multi_company"/>
+                            <field name="environment"/><field name="region"/><field name="app_id"/>
+                            <field name="app_secret" password="True" placeholder="Dejar vacío para conservar" groups="dreyes_clover_sync.group_clover_manager"/>
+                            <field name="merchant_id"/><field name="public_base_url"/>
+                            <field name="webhook_auth_code" password="True" placeholder="Dejar vacío para conservar" groups="dreyes_clover_sync.group_clover_manager"/>
+                        </group>
+                        <group string="Odoo">
+                            <field name="warehouse_id"/><field name="location_id"/><field name="pricelist_id"/>
+                            <field name="pos_config_id"/><field name="anonymous_partner_id"/><field name="backfill_from"/>
+                            <field name="website_ids" widget="many2many_tags" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Ajustes de ventas">
+                            <group><field name="tip_product_id"/><field name="service_charge_product_id"/><field name="refund_product_id"/><field name="discount_product_id"/></group>
+                        </page>
+                        <page string="Estado">
+                            <group><field name="initial_import_done" readonly="1"/><field name="last_catalog_sync" readonly="1"/><field name="last_stock_sync" readonly="1"/><field name="last_order_sync" readonly="1"/></group>
+                            <field name="last_error" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_clover_connectors" model="ir.actions.act_window">
+        <field name="name">Conexiones</field><field name="res_model">clover.connector</field><field name="view_mode">list,form</field>
+    </record>
+</odoo>

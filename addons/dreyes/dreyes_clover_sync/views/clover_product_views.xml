@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_clover_product_binding_list" model="ir.ui.view">
+        <field name="name">clover.product.binding.list</field><field name="model">clover.product.binding</field>
+        <field name="arch" type="xml"><list editable="bottom"><field name="connector_id"/><field name="product_id"/><field name="clover_item_id"/><field name="excluded"/><field name="sync_state" widget="badge"/><field name="last_sync"/><field name="last_error"/></list></field>
+    </record>
+    <record id="action_clover_product_bindings" model="ir.actions.act_window">
+        <field name="name">Productos por conexión</field><field name="res_model">clover.product.binding</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_clover_tender_map_list" model="ir.ui.view">
+        <field name="name">clover.tender.map.list</field><field name="model">clover.tender.map</field>
+        <field name="arch" type="xml"><list editable="bottom"><field name="connector_id"/><field name="clover_tender_id"/><field name="clover_label"/><field name="payment_method_id"/><field name="active"/></list></field>
+    </record>
+    <record id="action_clover_tender_maps" model="ir.actions.act_window">
+        <field name="name">Métodos de pago</field><field name="res_model">clover.tender.map</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_clover_modifier_group_list" model="ir.ui.view">
+        <field name="name">clover.modifier.group.list</field><field name="model">clover.modifier.group</field>
+        <field name="arch" type="xml"><list><field name="connector_id"/><field name="clover_id"/><field name="name"/><field name="min_required"/><field name="max_allowed"/></list></field>
+    </record>
+    <record id="view_clover_modifier_group_form" model="ir.ui.view">
+        <field name="name">clover.modifier.group.form</field><field name="model">clover.modifier.group</field>
+        <field name="arch" type="xml"><form><sheet><group><field name="connector_id"/><field name="clover_id"/><field name="name"/><field name="min_required"/><field name="max_allowed"/><field name="product_ids" widget="many2many_tags"/></group><field name="modifier_ids"><list editable="bottom"><field name="clover_id"/><field name="name"/><field name="price"/><field name="available"/></list></field></sheet></form></field>
+    </record>
+    <record id="action_clover_modifier_groups" model="ir.actions.act_window">
+        <field name="name">Modificadores</field><field name="res_model">clover.modifier.group</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_product_form_clover" model="ir.ui.view">
+        <field name="name">product.product.form.clover</field><field name="model">product.product</field><field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Clover" groups="dreyes_clover_sync.group_clover_operator"><field name="clover_binding_ids"><list editable="bottom"><field name="connector_id"/><field name="clover_item_id" readonly="1"/><field name="excluded"/><field name="sync_state" readonly="1"/><field name="last_sync" readonly="1"/><field name="last_error" readonly="1"/></list></field></page></xpath></field>
+    </record>
+</odoo>
