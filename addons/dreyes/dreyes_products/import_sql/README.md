@@ -15,19 +15,19 @@ Este directorio deja el flujo tecnico sin modulo Odoo:
 
 - Contenedor Odoo con `psql` disponible: `odoo_dreyes_18`
 - Base de datos `dreyes`
-- Archivos fuente montados en `/mnt/extra-addons/dreyes/productos`
+- Archivos fuente montados en `/mnt/extra-addons/dreyes/dreyes_products`
 
 ## 1. Cargar staging sin imagenes
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'export PGPASSWORD="$PASSWORD"; psql -h db -U odoo -d dreyes -f 01_stage.sql'
 ```
 
 ## 2. Descargar imagenes y generar CSV auxiliar
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   python3 predescarga_imagenes.py --skip-existing --image-mode original
 ```
 
@@ -35,6 +35,13 @@ El script genera:
 
 - `output/images/*`
 - `output/stg_wix_images.csv`
+
+Si quieres cargar imagenes ya preparadas localmente, por ejemplo `output/images_no_bg`, usa:
+
+```bash
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
+  python3 prepara_imagenes_locales.py
+```
 
 `--image-mode original` es el modo recomendado para produccion. El export de Wix trae thumbnails
 `w_50,h_50`; este modo reconstruye la URL del asset original en `static.wixstatic.com/media/...`
@@ -46,14 +53,14 @@ repetir la descarga para que se reemplacen por la version de mejor calidad.
 ## 3. Recargar staging incluyendo imagenes
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'export PGPASSWORD="$PASSWORD"; psql -h db -U odoo -d dreyes -v load_images=1 -f 01_stage.sql'
 ```
 
 ## 4. Dry-run de validacion
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'export PGPASSWORD="$PASSWORD"; psql -h db -U odoo -d dreyes -f 02_upsert.sql'
 ```
 
@@ -62,7 +69,7 @@ docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
 ## 5. Aplicar importacion real
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'export PGPASSWORD="$PASSWORD"; psql -h db -U odoo -d dreyes -v apply=1 -f 02_upsert.sql'
 ```
 
@@ -72,7 +79,7 @@ Este paso es obligatorio si quieres que las imagenes se vean correctamente en vi
 `image_1024`, `image_512`, `image_256` o `image_128`.
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'odoo shell -d dreyes --db_host=db --db_user=odoo --db_password="$PASSWORD" < post_import_odoo.py'
 ```
 
@@ -92,14 +99,14 @@ El script:
 Ejemplo:
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'export PGPASSWORD="$PASSWORD"; psql -h db -U odoo -d dreyes -v apply=1 -v location_id=8 -v owner_user_id=1 -f 02_upsert.sql'
 ```
 
 Y luego:
 
 ```bash
-docker exec -w /mnt/extra-addons/dreyes/productos/import_sql odoo_dreyes_18 \
+docker exec -w /mnt/extra-addons/dreyes/dreyes_products/import_sql odoo_dreyes_18 \
   bash -lc 'odoo shell -d dreyes --db_host=db --db_user=odoo --db_password="$PASSWORD" < post_import_odoo.py'
 ```
 

@@ -250,6 +250,12 @@ inserted AS (
     FROM missing
     RETURNING id, parent_id, name
 )
+SELECT count(*) AS inserted_internal_categories
+FROM inserted;
+
+-- Rows inserted by a data-modifying CTE are not visible when the same SQL
+-- statement scans product_category again.  Rebuild the stored hierarchy in a
+-- separate statement so parent_of/child_of domains never receive a NULL path.
 UPDATE product_category pc
 SET
     complete_name = parent.complete_name || ' / ' || pc.name,
@@ -258,7 +264,12 @@ SET
     write_date = now()
 FROM product_category parent
 WHERE pc.parent_id = parent.id
-  AND pc.id IN (SELECT id FROM inserted);
+  AND (
+      pc.parent_path IS NULL
+      OR pc.parent_path = ''
+      OR pc.complete_name IS NULL
+      OR pc.complete_name = ''
+  );
 
 CREATE TEMP TABLE tmp_internal_category_ids AS
 SELECT

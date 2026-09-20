@@ -19,8 +19,9 @@ Modulo de acceso web para DReyes.
 
 ## Notas
 
-- Redirige a usuarios publicos al login.
+- Los usuarios publicos pueden navegar el sitio sin iniciar sesion.
 - Tras login o signup devuelve al usuario autenticado al home del sitio.
+- El login o registro queda para el momento en que otro flujo del sitio lo requiera, por ejemplo checkout.
 - El formulario extendido fue separado al modulo `dreyes_dist`.
 
 Documentacion ampliada en `doc/README_TECNICO.md`.

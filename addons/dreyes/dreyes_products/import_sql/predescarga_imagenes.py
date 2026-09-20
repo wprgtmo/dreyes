@@ -14,7 +14,7 @@ import urllib.request
 
 
 def parse_args() -> argparse.Namespace:
-    default_root = pathlib.Path("/mnt/extra-addons/dreyes/productos")
+    default_root = pathlib.Path("/mnt/extra-addons/dreyes/dreyes_products")
     default_import_root = default_root / "import_sql"
     parser = argparse.ArgumentParser(
         description="Descarga imagenes Wix y genera stg_wix_images.csv para psql."

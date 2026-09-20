@@ -2,22 +2,22 @@
 
 \if :{?catalog_csv}
 \else
-\set catalog_csv '/mnt/extra-addons/dreyes/productos/catalog_products.csv'
+\set catalog_csv '/mnt/extra-addons/dreyes/dreyes_products/catalog_products.csv'
 \endif
 
 \if :{?inventory_csv}
 \else
-\set inventory_csv '/mnt/extra-addons/dreyes/productos/product-inventory-v3_2026-05-04-2026-05-05.csv'
+\set inventory_csv '/mnt/extra-addons/dreyes/dreyes_products/product-inventory-v3_2026-05-04-2026-05-05.csv'
 \endif
 
 \if :{?categories_csv}
 \else
-\set categories_csv '/mnt/extra-addons/dreyes/productos/categ_products.csv'
+\set categories_csv '/mnt/extra-addons/dreyes/dreyes_products/categ_products.csv'
 \endif
 
 \if :{?images_csv}
 \else
-\set images_csv '/mnt/extra-addons/dreyes/productos/import_sql/output/stg_wix_images.csv'
+\set images_csv '/mnt/extra-addons/dreyes/dreyes_products/import_sql/output/stg_wix_images.csv'
 \endif
 
 \if :{?load_images}
@@ -164,18 +164,18 @@ TRUNCATE TABLE stg_wix_catalog;
 TRUNCATE TABLE stg_wix_inventory;
 TRUNCATE TABLE stg_wix_category_map;
 
-\echo Cargando catalogo desde /mnt/extra-addons/dreyes/productos/catalog_products.csv
-\copy stg_wix_catalog FROM '/mnt/extra-addons/dreyes/productos/catalog_products.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
+\echo Cargando catalogo desde /mnt/extra-addons/dreyes/dreyes_products/catalog_products.csv
+\copy stg_wix_catalog FROM '/mnt/extra-addons/dreyes/dreyes_products/catalog_products.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
 
-\echo Cargando inventario desde /mnt/extra-addons/dreyes/productos/product-inventory-v3_2026-05-04-2026-05-05.csv
-\copy stg_wix_inventory FROM '/mnt/extra-addons/dreyes/productos/product-inventory-v3_2026-05-04-2026-05-05.csv' WITH (FORMAT csv, HEADER true, ENCODING 'LATIN1')
+\echo Cargando inventario desde /mnt/extra-addons/dreyes/dreyes_products/product-inventory-v3_2026-05-04-2026-05-05.csv
+\copy stg_wix_inventory FROM '/mnt/extra-addons/dreyes/dreyes_products/product-inventory-v3_2026-05-04-2026-05-05.csv' WITH (FORMAT csv, HEADER true, ENCODING 'LATIN1')
 
 CREATE TEMP TABLE tmp_wix_category_names_raw (
     category_name text
 );
 
-\echo Cargando nombres de categorias desde /mnt/extra-addons/dreyes/productos/categ_products.csv
-\copy tmp_wix_category_names_raw (category_name) FROM '/mnt/extra-addons/dreyes/productos/categ_products.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
+\echo Cargando nombres de categorias desde /mnt/extra-addons/dreyes/dreyes_products/categ_products.csv
+\copy tmp_wix_category_names_raw (category_name) FROM '/mnt/extra-addons/dreyes/dreyes_products/categ_products.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
 
 INSERT INTO stg_wix_category_map (slug, category_name, source)
 VALUES
@@ -233,8 +233,8 @@ WHERE NOT EXISTS (
 TRUNCATE TABLE stg_wix_images;
 
 \if :load_images
-\echo Cargando metadatos de imagenes desde /mnt/extra-addons/dreyes/productos/import_sql/output/stg_wix_images.csv
-\copy stg_wix_images (sku, image_url, image_path, mimetype, file_size, checksum, db_datas_base64, download_status, error_message) FROM '/mnt/extra-addons/dreyes/productos/import_sql/output/stg_wix_images.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
+\echo Cargando metadatos de imagenes desde /mnt/extra-addons/dreyes/dreyes_products/import_sql/output/stg_wix_images.csv
+\copy stg_wix_images (sku, image_url, image_path, mimetype, file_size, checksum, db_datas_base64, download_status, error_message) FROM '/mnt/extra-addons/dreyes/dreyes_products/import_sql/output/stg_wix_images.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
 \else
 \echo Saltando carga de imagenes. Ejecuta con -v load_images=1 cuando exista stg_wix_images.csv
 \endif

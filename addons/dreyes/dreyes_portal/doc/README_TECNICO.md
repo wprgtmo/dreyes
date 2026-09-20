@@ -4,7 +4,7 @@
 
 `dreyes_portal` concentra exclusivamente la experiencia de acceso web de DReyes:
 
-- redireccion de visitantes anonimos al login;
+- navegacion publica del website sin bloqueo de login;
 - personalizacion visual del login;
 - personalizacion visual del registro;
 - redireccion al home del sitio despues de login o signup.
@@ -26,8 +26,7 @@ Clases:
 
 Comportamiento:
 
-- `/` redirige al login si el usuario es publico;
-- `/` muestra el home del `website` si el usuario ya inicio sesion;
+- `/` renderiza el home real del `website` para usuarios publicos y autenticados;
 - el login exitoso vuelve al home del sitio cuando no se especifica otro `redirect`;
 - el signup exitoso vuelve al home del sitio.
 
@@ -75,3 +74,4 @@ Expone esos campos como `related` para configurarlos desde Website.
 
 - Si se necesita el flujo de datos obligatorios despues del registro, instalar `dreyes_dist`.
 - `dreyes_portal` ya no redirige a `/profile/new`, `/profile/view/<id>` ni `/profile/complete`.
+- `dreyes_portal` no debe forzar login para recorrer paginas publicas del sitio; ese requisito debe quedar solo en flujos especificos como checkout si otro modulo lo define.
