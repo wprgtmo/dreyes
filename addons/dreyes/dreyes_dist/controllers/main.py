@@ -1,57 +1,86 @@
 # -*- coding: utf-8 -*-
 import base64
-import re
 
 from werkzeug.utils import secure_filename
 
-from odoo import _, fields, http
+from odoo import _, http
 from odoo.addons.dreyes_portal.controllers.main import (
-    DreyesPortalController, DreyesPortalHome, DreyesPortalRedirectMixin, DreyesPortalSignup,
+    DreyesPortalController,
+    DreyesPortalHome,
+    DreyesPortalRedirectMixin,
+    DreyesPortalSignup,
 )
-from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.exceptions import UserError, ValidationError
-from odoo.http import content_disposition, request
+from odoo.exceptions import UserError
+from odoo.http import request
 
-
+EXTENDED_PROFILE_FIELDS = {
+    "first_name",
+    "last_name",
+    "street",
+    "street2",
+    "city",
+    "state_id",
+    "zip",
+    "country_id",
+    "phone_code",
+    "phone",
+    "join_community",
+}
 MAX_TAX_PERMIT_SIZE = 15 * 1024 * 1024
 ALLOWED_TAX_PERMIT_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
-PROFILE_URL = "/my/distributor-profile"
+PROFILE_COMPLETION_URL = "/profile/complete"
 
 
 class DreyesDistRedirectMixin(DreyesPortalRedirectMixin):
+    def _get_profile_completion_url(self):
+        return PROFILE_COMPLETION_URL
+
     def _is_extended_signup_enabled(self):
         website = getattr(request, "website", False)
-        return bool(website and website._dreyes_is_distribution_site())
+        if website:
+            return (website.signup_form_type or website.company_id.signup_form_type or "basic") == "extended"
+        return request.env.company.signup_form_type == "extended"
 
-    def _requires_profile_prompt(self, user):
+    def _requires_profile_completion(self, user):
         if not self._is_extended_signup_enabled() or user._is_public():
             return False
-        profile = request.website._dreyes_profile_for_partner(user.partner_id, create=True)
-        return profile.state == "no_profile"
+
+        partner = user.sudo().partner_id
+        required_values = [
+            partner.first_name,
+            partner.last_name,
+            partner.street,
+            partner.city,
+            partner.state_id,
+            partner.zip,
+            partner.country_id,
+            partner.phone,
+            partner.tax_permit_attachment_id,
+        ]
+        return not all(required_values)
 
     def _get_user_home_url(self, user):
-        if self._requires_profile_prompt(user):
-            return PROFILE_URL
+        if self._requires_profile_completion(user):
+            return self._get_profile_completion_url()
         return super()._get_user_home_url(user)
 
     def _get_signup_redirect_url(self, user):
-        if self._requires_profile_prompt(user):
-            return PROFILE_URL
+        if self._requires_profile_completion(user):
+            return self._get_profile_completion_url()
         return super()._get_signup_redirect_url(user)
 
 
 class DreyesDistPortalController(DreyesDistRedirectMixin, DreyesPortalController):
     @http.route("/", type="http", auth="public", website=True)
     def index(self, **kwargs):
+        user = request.env.user
+        if self._requires_profile_completion(user):
+            return request.redirect(self._get_profile_completion_url())
         return super().index(**kwargs)
 
 
 class DreyesDistPortalHome(DreyesDistRedirectMixin, DreyesPortalHome):
-    def _login_redirect(self, uid, redirect=None):
-        user = request.env["res.users"].sudo().browse(uid)
-        if self._requires_profile_prompt(user):
-            redirect = PROFILE_URL
-        return super()._login_redirect(uid, redirect=redirect)
+    pass
 
 
 class DreyesDistPortalSignup(DreyesDistRedirectMixin, DreyesPortalSignup):
@@ -60,207 +89,119 @@ class DreyesDistPortalSignup(DreyesDistRedirectMixin, DreyesPortalSignup):
         return super().web_auth_signup(*args, **kw)
 
 
-class DreyesDistProfile(http.Controller):
-    def _profile(self):
-        return request.website._dreyes_profile_for_partner(request.env.user.partner_id, create=True)
-
-    def _split_phone(self, phone):
-        match = re.match(r"^\+(\d+)\s+(.+)$", phone or "")
-        return (match.group(1), match.group(2)) if match else ("1", phone or "")
-
-    def _values(self, profile, error=None):
-        partner = profile.partner_id
-        phone_code, phone = self._split_phone(partner.phone)
-        state_label = dict(profile._fields["state"].selection).get(profile.state)
+class DreyesDistProfileCompletion(DreyesDistRedirectMixin, http.Controller):
+    def _get_profile_completion_values(self, partner):
         return {
-            "profile": profile,
-            "profile_state": profile.state,
-            "profile_state_label": state_label,
-            "legal_business_name": profile.legal_business_name or "",
-            "ein_masked": "***-**-%s" % profile.ein[-4:] if profile.ein else "",
-            "tax_permit_number": profile.tax_permit_number or "",
-            "first_name": partner.first_name or "", "last_name": partner.last_name or "",
-            "email": partner.email or request.env.user.login or "",
-            "street": partner.street or "", "street2": partner.street2 or "",
-            "city": partner.city or "", "state_id": str(partner.state_id.id) if partner.state_id else "",
-            "zip": partner.zip or "", "country_id": str(partner.country_id.id) if partner.country_id else "",
-            "phone_code": phone_code, "phone": phone, "join_community": partner.join_community,
+            "first_name": partner.first_name or "",
+            "last_name": partner.last_name or "",
+            "street": partner.street or "",
+            "street2": partner.street2 or "",
+            "city": partner.city or "",
+            "state_id": str(partner.state_id.id) if partner.state_id else "",
+            "zip": partner.zip or "",
+            "country_id": str(partner.country_id.id) if partner.country_id else "",
+            "phone_code": "1",
+            "phone": partner.phone or "",
+            "join_community": partner.join_community,
+        }
+
+    def _get_profile_completion_qcontext(self, error=None, values=None):
+        partner = request.env.user.sudo().partner_id
+        qcontext = self._get_profile_completion_values(partner)
+        qcontext.update({key: request.params.get(key, qcontext.get(key)) for key in EXTENDED_PROFILE_FIELDS})
+        if values:
+            qcontext.update(values)
+        qcontext.update({
+            "error": error,
             "countries": request.env["res.country"].sudo().search([]),
             "states": request.env["res.country.state"].sudo().search([]),
             "phone_countries": request.env["res.country"].sudo().search([("phone_code", "!=", False)]),
-            "error": error,
+        })
+        qcontext.setdefault("phone_code", "1")
+        return qcontext
+
+    def _validate_profile_completion(self, qcontext):
+        required_fields = {
+            "first_name": _("First name"),
+            "last_name": _("Last name"),
+            "street": _("Street Address"),
+            "city": _("City"),
+            "state_id": _("Region/State/Province"),
+            "zip": _("Postal / Zip code"),
+            "country_id": _("Country"),
+            "phone": _("Phone"),
         }
+        missing = [label for field, label in required_fields.items() if not (qcontext.get(field) or "").strip()]
+        if missing:
+            raise UserError(_("Please complete the required fields: %s") % ", ".join(missing))
 
-    def _normalized_digits(self, value, length, label, required=False):
-        value = (value or "").strip()
-        if not value:
-            if required:
-                raise UserError(_("%s es obligatorio.") % label)
-            return False
-        digits = re.sub(r"[\s-]", "", value)
-        if not digits.isdigit() or len(digits) != length:
-            raise UserError(_("%s debe contener exactamente %s dígitos.") % (label, length))
-        return digits
-
-    def _read_upload(self):
+        partner = request.env.user.sudo().partner_id
         upload = request.httprequest.files.get("tax_permit")
+        if (not upload or not upload.filename) and not partner.tax_permit_attachment_id:
+            raise UserError(_("Texas Sales and Use Tax Permit is required."))
         if not upload or not upload.filename:
-            return False
+            return
+
         filename = secure_filename(upload.filename)
         extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         if extension not in ALLOWED_TAX_PERMIT_EXTENSIONS:
-            raise UserError(_("El tax permit debe ser un archivo PDF, JPG, JPEG o PNG."))
-        data = upload.read(MAX_TAX_PERMIT_SIZE + 1)
-        if not data:
-            raise UserError(_("El archivo del tax permit está vacío."))
-        if len(data) > MAX_TAX_PERMIT_SIZE:
-            raise UserError(_("El tax permit debe pesar 15 MB o menos."))
-        return {"filename": filename, "data": data, "mimetype": upload.mimetype}
+            raise UserError(_("The tax permit file must be a PDF, JPG, JPEG, or PNG."))
 
-    def _save(self, profile, post, submit=False):
-        upload = self._read_upload()
-        ein_value = post.get("ein")
-        ein = profile.ein if not (ein_value or "").strip() and profile.ein else self._normalized_digits(
-            ein_value, 9, _("EIN"), required=submit,
-        )
-        permit_number = self._normalized_digits(
-            post.get("tax_permit_number"), 11, _("Número de permiso de Texas"), required=submit,
-        )
-        country_id = int(post["country_id"]) if post.get("country_id") else False
-        state_id = int(post["state_id"]) if post.get("state_id") else False
-        phone_code = re.sub(r"\D", "", post.get("phone_code") or "")
-        phone_number = (post.get("phone") or "").strip()
-        partner_values = {
-            "first_name": (post.get("first_name") or "").strip(),
-            "last_name": (post.get("last_name") or "").strip(),
-            "email": (post.get("email") or "").strip(),
-            "street": (post.get("street") or "").strip(), "street2": (post.get("street2") or "").strip(),
-            "city": (post.get("city") or "").strip(), "state_id": state_id,
-            "zip": (post.get("zip") or "").strip(), "country_id": country_id,
-            "phone": (f"+{phone_code} {phone_number}" if phone_code else phone_number).strip(),
-            "join_community": bool(post.get("join_community")),
+        file_data = upload.read()
+        if len(file_data) > MAX_TAX_PERMIT_SIZE:
+            raise UserError(_("The tax permit file must be 15MB or smaller."))
+
+        qcontext["tax_permit_file"] = {
+            "filename": filename,
+            "content": file_data,
+            "mimetype": upload.mimetype,
         }
-        old_state = profile.state
-        profile.partner_id.sudo().write(partner_values)
-        profile.sudo().write({
-            "legal_business_name": (post.get("legal_business_name") or "").strip(),
-            "ein": ein, "tax_permit_number": permit_number,
-        })
-        if upload:
+
+    def _update_profile_completion_partner(self, qcontext):
+        partner = request.env.user.sudo().partner_id
+        phone_code = (qcontext.get("phone_code") or "").strip()
+        phone = (qcontext.get("phone") or "").strip()
+        if phone_code and not phone_code.startswith("+"):
+            phone_code = f"+{phone_code}"
+
+        partner_values = {
+            "first_name": (qcontext.get("first_name") or "").strip(),
+            "last_name": (qcontext.get("last_name") or "").strip(),
+            "join_community": bool(qcontext.get("join_community")),
+            "street": (qcontext.get("street") or "").strip(),
+            "street2": (qcontext.get("street2") or "").strip(),
+            "city": (qcontext.get("city") or "").strip(),
+            "state_id": int(qcontext.get("state_id")),
+            "zip": (qcontext.get("zip") or "").strip(),
+            "country_id": int(qcontext.get("country_id")),
+            "phone": f"{phone_code} {phone}".strip(),
+        }
+        partner.write(partner_values)
+
+        tax_permit = qcontext.get("tax_permit_file")
+        if tax_permit:
             attachment = request.env["ir.attachment"].sudo().create({
-                "name": upload["filename"], "datas": base64.b64encode(upload["data"]),
-                "mimetype": upload["mimetype"], "res_model": "dreyes.distributor.profile", "res_id": profile.id,
-                "public": False,
+                "name": tax_permit["filename"],
+                "datas": base64.b64encode(tax_permit["content"]).decode("ascii"),
+                "mimetype": tax_permit["mimetype"],
+                "res_model": "res.partner",
+                "res_id": partner.id,
             })
-            permit = request.env["dreyes.distributor.permit"].sudo().create({
-                "profile_id": profile.id, "attachment_id": attachment.id, "filename": upload["filename"],
-                "mimetype": upload["mimetype"], "uploaded_by_id": request.env.user.id,
-            })
-            profile.sudo().current_permit_id = permit
+            partner.tax_permit_attachment_id = attachment.id
 
-        if submit:
-            missing = profile._required_missing_labels()
-            if missing:
-                raise UserError(_("Faltan datos obligatorios: %s") % ", ".join(missing))
-            profile.sudo().write({
-                "state": "under_review", "submitted_at": fields.Datetime.now(),
-                "submitted_by_id": request.env.user.id, "correction_reason": False,
-                "reviewed_at": False, "reviewed_by_id": False, "approved_at": False, "approved_by_id": False,
-            })
-            profile.notify_reviewers(
-                _("Perfil de distribuidor enviado a revisión"),
-                _("El cliente %s envió su perfil de distribuidor a revisión.") % (profile.legal_business_name or profile.partner_id.name),
-            )
-        elif old_state == "pending_approval":
-            profile.sudo().write({"state": "under_review", "reviewed_at": False, "reviewed_by_id": False})
-            profile.notify_reviewers(_("Perfil modificado"), _("Un perfil pendiente de aprobación fue modificado y debe revisarse nuevamente."))
-        elif old_state == "under_review":
-            profile.notify_reviewers(_("Perfil modificado durante la revisión"), _("El cliente actualizó su expediente en revisión."))
-        elif old_state == "approved" and upload:
-            profile.sudo().write({"state": "under_review", "approved_at": False, "approved_by_id": False})
-            profile.notify_reviewers(_("Nuevo tax permit"), _("Un cliente aprobado reemplazó su tax permit y requiere nueva revisión."))
+    @http.route(PROFILE_COMPLETION_URL, type="http", auth="user", website=True, sitemap=False)
+    def profile_complete(self, **kw):
+        user = request.env.user
+        if not self._requires_profile_completion(user):
+            return request.redirect(self._get_user_home_url(user))
 
-    @http.route([PROFILE_URL, "/profile/complete"], type="http", auth="user", website=True, methods=["GET", "POST"])
-    def distributor_profile(self, **post):
-        if not request.website._dreyes_is_distribution_site():
-            return request.redirect("/my/account")
-        profile = self._profile()
-        error = None
+        qcontext = self._get_profile_completion_qcontext()
         if request.httprequest.method == "POST":
             try:
-                action = post.get("action", "save")
-                if action == "later":
-                    return request.redirect("/my/home")
-                self._save(profile, post, submit=action == "submit")
-                return request.redirect(PROFILE_URL + "?saved=1")
-            except (UserError, ValidationError, ValueError) as exc:
-                error = exc.args[0] if exc.args else str(exc)
-        values = self._values(profile, error=error)
-        values["saved"] = request.params.get("saved")
-        return request.render("dreyes_dist.portal_distributor_profile", values)
+                self._validate_profile_completion(qcontext)
+                self._update_profile_completion_partner(qcontext)
+                return request.redirect(self._get_user_home_url(user))
+            except UserError as e:
+                qcontext["error"] = e.args[0]
 
-    @http.route("/my/distributor-profile/permit/<int:permit_id>", type="http", auth="user", website=True)
-    def download_permit(self, permit_id, **kw):
-        permit = request.env["dreyes.distributor.permit"].sudo().browse(permit_id).exists()
-        profile = self._profile()
-        if not permit or permit.profile_id != profile:
-            return request.not_found()
-        data = base64.b64decode(permit.attachment_id.datas or b"")
-        return request.make_response(data, headers=[
-            ("Content-Type", permit.mimetype or "application/octet-stream"),
-            ("Content-Disposition", content_disposition(permit.filename)),
-            ("X-Content-Type-Options", "nosniff"),
-        ])
-
-
-class DreyesDistributionWebsiteSale(WebsiteSale):
-    def _dreyes_blocked(self):
-        return request.website._dreyes_is_distribution_site() and not request.website._dreyes_can_purchase()
-
-    def _dreyes_blocked_redirect(self):
-        if request.env.user._is_public():
-            return request.redirect("/web/login?redirect=/shop")
-        return request.redirect(PROFILE_URL)
-
-    @http.route()
-    def is_add_to_cart_allowed(self, product_id, **kwargs):
-        if self._dreyes_blocked():
-            return False
-        return super().is_add_to_cart_allowed(product_id, **kwargs)
-
-    @http.route()
-    def cart_update(self, product_id, add_qty=1, set_qty=0, **kwargs):
-        if self._dreyes_blocked():
-            return self._dreyes_blocked_redirect()
-        return super().cart_update(product_id, add_qty=add_qty, set_qty=set_qty, **kwargs)
-
-    @http.route()
-    def cart_update_json(self, product_id, **kwargs):
-        if self._dreyes_blocked():
-            message = _("Su cuenta debe estar aprobada antes de comprar.")
-            return {"quantity": 0, "cart_quantity": 0, "warning": message, "notification_info": {"warning": message}}
-        return super().cart_update_json(product_id, **kwargs)
-
-    @http.route()
-    def cart(self, access_token=None, revive="", **post):
-        if self._dreyes_blocked():
-            return self._dreyes_blocked_redirect()
-        return super().cart(access_token=access_token, revive=revive, **post)
-
-    @http.route()
-    def shop_checkout(self, try_skip_step=None, **query_params):
-        if self._dreyes_blocked():
-            return self._dreyes_blocked_redirect()
-        return super().shop_checkout(try_skip_step=try_skip_step, **query_params)
-
-    @http.route()
-    def shop_payment(self, **post):
-        if self._dreyes_blocked():
-            return self._dreyes_blocked_redirect()
-        return super().shop_payment(**post)
-
-    @http.route()
-    def shop_payment_validate(self, sale_order_id=None, **post):
-        if self._dreyes_blocked():
-            return self._dreyes_blocked_redirect()
-        return super().shop_payment_validate(sale_order_id=sale_order_id, **post)
+        return request.render("dreyes_dist.portal_profile_complete", qcontext)
