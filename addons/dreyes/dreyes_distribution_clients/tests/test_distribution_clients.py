@@ -4,6 +4,15 @@ from odoo.tests import TransactionCase, tagged
 
 @tagged("post_install", "-at_install")
 class TestDistributionClientsApplication(TransactionCase):
+    def test_root_menu_uses_application_icon(self):
+        menu = self.env.ref(
+            "dreyes_distribution_clients.menu_distribution_clients_root"
+        )
+        self.assertEqual(
+            menu.web_icon,
+            "dreyes_distribution_clients,static/description/icon.png",
+        )
+
     def test_main_action_contains_all_requested_views(self):
         action = self.env.ref("dreyes_distribution_clients.action_distribution_clients_all")
         self.assertEqual(action.view_mode, "kanban,list,form,graph,pivot")
