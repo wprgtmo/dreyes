@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="dreyes_product_pricing.ProductPricingWidget">
+        <PricingTable sourceModel="props.record.resModel" sourceId="props.record.resId || false"/>
+    </t>
+    <t t-name="dreyes_product_pricing.PricingCatalogAction">
+        <div class="o_dreyes_pricing_catalog d-flex flex-column h-100">
+            <Layout display="{ controlPanel: {} }">
+                <div class="p-3">
+                    <PricingTable sourceModel="'product.pricelist'" sourceId="sourceId"/>
+                </div>
+            </Layout>
+        </div>
+    </t>
+    <t t-name="dreyes_product_pricing.PricingTable">
+        <section class="o_dreyes_pricing_table" aria-label="Precios por lista">
+            <div t-if="!props.sourceId" class="alert alert-info" role="status">
+                Guarde el producto para consultar sus listas de precios.
+            </div>
+            <t t-else="">
+                <form class="d-flex flex-wrap align-items-end gap-3 mb-3" t-on-submit.prevent="refresh">
+                    <label class="d-flex flex-column gap-1">
+                        <span>Cantidad</span>
+                        <input type="number" class="form-control o_dreyes_quantity" min="0.000001" step="any"
+                               required="required" t-model="state.quantity" t-att-disabled="state.loading || state.saving"/>
+                    </label>
+                    <label class="d-flex flex-column gap-1">
+                        <span>Fecha</span>
+                        <input type="date" class="form-control" required="required" t-model="state.date"
+                               t-att-disabled="state.loading || state.saving"/>
+                    </label>
+                    <label class="d-flex flex-column gap-1 flex-grow-1">
+                        <span>Buscar producto o lista</span>
+                        <input type="search" class="form-control" placeholder="Nombre, referencia, código de barras o lista"
+                               t-model="state.search" t-att-disabled="state.loading || state.saving"/>
+                    </label>
+                    <button type="submit" class="btn btn-primary" t-att-disabled="state.loading || state.saving">
+                        Consultar
+                    </button>
+                </form>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                    <span class="text-muted">Precio unitario en la unidad del producto y la moneda de cada lista.</span>
+                    <nav class="d-flex align-items-center gap-2" aria-label="Paginación de precios">
+                        <span aria-live="polite" t-esc="rangeLabel"/>
+                        <button type="button" class="btn btn-light" aria-label="Página anterior"
+                                t-att-disabled="state.offset === 0 || state.loading || state.saving"
+                                t-on-click="() => this.changePage(-1)">
+                            <i class="fa fa-chevron-left"/>
+                        </button>
+                        <button type="button" class="btn btn-light" aria-label="Página siguiente"
+                                t-att-disabled="state.offset + state.rows.length &gt;= state.total || state.loading || state.saving"
+                                t-on-click="() => this.changePage(1)">
+                            <i class="fa fa-chevron-right"/>
+                        </button>
+                    </nav>
+                </div>
+                <div t-if="state.error" class="alert alert-danger" role="alert" t-esc="state.error"/>
+                <div t-if="state.loading" class="text-muted py-3" role="status">
+                    <i class="fa fa-spinner fa-spin me-2"/>Calculando precios…
+                </div>
+                <div t-elif="!state.error &amp;&amp; !state.rows.length" class="alert alert-info" role="status">
+                    No hay productos o listas de precios para esta consulta.
+                </div>
+                <div t-elif="!state.error" class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto / variante</th>
+                                <th scope="col">Referencia</th>
+                                <th scope="col">Lista de precios</th>
+                                <th scope="col">Moneda</th>
+                                <th scope="col">Unidad</th>
+                                <th scope="col" class="text-end">Precio calculado</th>
+                                <th scope="col">Regla aplicada</th>
+                                <th t-if="hasEditableRows" scope="col">Nuevo precio fijo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="state.rows" t-as="row" t-key="row.key">
+                                <td><button type="button" class="btn btn-link p-0 text-start"
+                                            t-on-click="() => this.openRecord('product.product', row.product_id)"
+                                            t-esc="row.product_name"/></td>
+                                <td t-esc="row.default_code"/>
+                                <td><button type="button" class="btn btn-link p-0 text-start"
+                                            t-on-click="() => this.openRecord('product.pricelist', row.pricelist_id)"
+                                            t-esc="row.pricelist_name"/></td>
+                                <td t-esc="row.currency_name"/>
+                                <td t-esc="row.uom_name"/>
+                                <td class="text-end text-nowrap fw-bold" t-esc="formatPrice(row)"/>
+                                <td>
+                                    <button t-if="row.rule_id" type="button" class="btn btn-link p-0 text-start"
+                                            t-on-click="() => this.openRecord('product.pricelist.item', row.rule_id)"
+                                            t-esc="row.rule_name"/>
+                                    <span t-else="" class="text-muted" t-esc="row.rule_name"/>
+                                </td>
+                                <td t-if="hasEditableRows">
+                                    <div t-if="row.can_edit" class="d-flex gap-2 o_dreyes_price_editor">
+                                        <input type="number" min="0" step="any" class="form-control"
+                                               t-att-aria-label="'Nuevo precio fijo: ' + row.product_name + ' / ' + row.pricelist_name"
+                                               t-att-value="state.drafts[row.key] || ''"
+                                               t-att-disabled="state.saving"
+                                               t-on-input="(event) => this.updateDraft(row, event)"/>
+                                        <button type="button" class="btn btn-outline-primary"
+                                                t-att-disabled="state.saving || !state.drafts[row.key]"
+                                                t-on-click="() => this.save(row)">Guardar</button>
+                                    </div>
+                                    <span t-else="" class="text-muted">Solo consulta</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p t-if="hasEditableRows" class="text-muted small mt-3 mb-0">
+                    Guardar crea o actualiza un precio fijo para esta variante, desde 1 unidad y sin vencimiento.
+                    Se conservan las reglas por cantidad y vigencia; otra regla puede determinar el precio consultado.
+                </p>
+            </t>
+        </section>
+    </t>
+</templates>

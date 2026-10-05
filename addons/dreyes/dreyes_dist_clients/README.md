@@ -1,4 +1,4 @@
-# `dreyes_distribution_clients`
+# `dreyes_dist_clients`
 
 Aplicación administrativa para consultar y procesar solicitudes de clientes distribuidores.
 

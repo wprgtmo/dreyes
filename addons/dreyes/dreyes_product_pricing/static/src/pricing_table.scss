@@ -1,0 +1,17 @@
+.o_dreyes_pricing_table {
+    .o_dreyes_quantity {
+        width: 8rem;
+    }
+
+    .o_dreyes_price_editor {
+        min-width: 13rem;
+
+        input {
+            min-width: 6rem;
+        }
+    }
+
+    thead th {
+        white-space: nowrap;
+    }
+}

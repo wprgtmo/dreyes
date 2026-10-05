@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The common form is also inherited by the native product.product form. -->
+    <record id="product_template_form_pricing" model="ir.ui.view">
+        <field name="name">product.template.form.dreyes.pricing</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="dreyes_product_pricing" string="Listas de precios" groups="base.group_user">
+                    <widget name="dreyes_product_pricing_table"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="product_pricelist_form_pricing" model="ir.ui.view">
+        <field name="name">product.pricelist.form.dreyes.pricing</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/widget[@name='web_ribbon']" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_dreyes_pricing_products" type="object" class="oe_stat_button"
+                            icon="fa-cubes" invisible="not id or not active">
+                        <field name="dreyes_pricing_product_count" widget="statinfo" string="Productos"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
