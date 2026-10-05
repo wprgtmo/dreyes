@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dreyes_market_segment_reviewer,dreyes.market.segment reviewer,model_dreyes_market_segment,dreyes_dist.group_distribution_reviewer,1,1,1,1
+access_dreyes_distributor_profile_reviewer,dreyes.distributor.profile reviewer,model_dreyes_distributor_profile,dreyes_dist.group_distribution_reviewer,1,1,1,0
+access_dreyes_distributor_permit_reviewer,dreyes.distributor.permit reviewer,model_dreyes_distributor_permit,dreyes_dist.group_distribution_reviewer,1,0,0,0

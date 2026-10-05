@@ -16,6 +16,7 @@ services:
       HOST: ${DB_HOST}
       USER: ${DB_USER}
       PASSWORD: ${DB_PASSWORD}      
+      CLOVER_TOKEN_ENCRYPTION_KEY: ${CLOVER_TOKEN_ENCRYPTION_KEY:-}
     command: odoo -d dreyes -u dom_portal   
   db:
     container_name: ${POSTGRES_CONTAINER_NAME}

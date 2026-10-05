@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_clover_event_list" model="ir.ui.view">
+        <field name="name">clover.sync.event.list</field><field name="model">clover.sync.event</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-warning="state == 'retry'" create="0">
+                <field name="create_date"/><field name="connector_id"/><field name="direction"/><field name="event_type"/>
+                <field name="object_type"/><field name="object_id"/><field name="state" widget="badge"/><field name="attempts"/><field name="next_retry"/>
+                <button name="action_retry" type="object" icon="fa-refresh" title="Reintentar" invisible="state not in ['retry', 'error']"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_clover_event_form" model="ir.ui.view">
+        <field name="name">clover.sync.event.form</field><field name="model">clover.sync.event</field>
+        <field name="arch" type="xml">
+            <form create="0"><header><button name="action_retry" type="object" string="Reintentar" class="oe_highlight" invisible="state not in ['retry', 'error']"/><field name="state" widget="statusbar"/></header>
+                <sheet><group><group><field name="connector_id"/><field name="direction"/><field name="event_type"/><field name="object_type"/><field name="object_id"/></group>
+                <group><field name="attempts"/><field name="next_retry"/><field name="processed_at"/><field name="dedupe_key"/></group></group>
+                <group string="Error"><field name="last_error" nolabel="1"/></group><group string="Payload"><field name="payload" nolabel="1" widget="json"/></group></sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_clover_events" model="ir.actions.act_window">
+        <field name="name">Eventos</field><field name="res_model">clover.sync.event</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_clover_conflict_list" model="ir.ui.view">
+        <field name="name">clover.sync.conflict.list</field><field name="model">clover.sync.conflict</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-warning="state == 'open'">
+                <field name="create_date"/><field name="connector_id"/><field name="object_type"/><field name="clover_id"/><field name="field_name"/>
+                <field name="odoo_value"/><field name="clover_value"/><field name="state" widget="badge"/>
+                <button name="action_accept_clover" type="object" string="Aceptar" invisible="state != 'open'"/>
+                <button name="action_restore_clover" type="object" string="Restaurar Clover" invisible="state != 'open'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_clover_conflict_form" model="ir.ui.view">
+        <field name="name">clover.sync.conflict.form</field><field name="model">clover.sync.conflict</field>
+        <field name="arch" type="xml">
+            <form create="0"><header><button name="action_accept_clover" type="object" string="Aceptar Clover" class="oe_highlight" invisible="state != 'open'"/><button name="action_restore_clover" type="object" string="Restaurar Clover" invisible="state != 'open'"/><field name="state" widget="statusbar"/></header>
+                <sheet><group><group><field name="connector_id"/><field name="object_type"/><field name="clover_id"/><field name="field_name"/></group><group><field name="resolved_by"/><field name="resolved_at"/></group></group>
+                <group><field name="odoo_value"/><field name="clover_value"/></group><field name="payload" widget="json"/></sheet></form>
+        </field>
+    </record>
+    <record id="action_clover_conflicts" model="ir.actions.act_window">
+        <field name="name">Conflictos</field><field name="res_model">clover.sync.conflict</field><field name="view_mode">list,form</field><field name="domain">[('state','=','open')]</field>
+    </record>
+
+    <record id="view_clover_object_map_list" model="ir.ui.view">
+        <field name="name">clover.object.map.list</field><field name="model">clover.object.map</field>
+        <field name="arch" type="xml"><list><field name="connector_id"/><field name="object_type"/><field name="clover_id"/><field name="odoo_model"/><field name="odoo_res_id"/><field name="last_sync"/></list></field>
+    </record>
+    <record id="action_clover_object_maps" model="ir.actions.act_window">
+        <field name="name">Asociaciones</field><field name="res_model">clover.object.map</field><field name="view_mode">list,form</field>
+    </record>
+</odoo>

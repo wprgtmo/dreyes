@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_distribution_client_search" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.search.clients</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="arch" type="xml">
+            <search string="Buscar clientes distribuidores">
+                <field name="legal_business_name"/>
+                <field name="partner_id"/>
+                <field name="contact_email"/>
+                <field name="tax_permit_number"/>
+                <field name="segment_id"/>
+                <separator/>
+                <filter name="without_profile" string="Sin perfil" domain="[('state', '=', 'no_profile')]"/>
+                <filter name="under_review" string="En revisión" domain="[('state', '=', 'under_review')]"/>
+                <filter name="pending_approval" string="Pendiente de aprobación" domain="[('state', '=', 'pending_approval')]"/>
+                <filter name="approved" string="Aprobados" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter name="pending_requests" string="Solicitudes pendientes" domain="[('state', 'in', ('under_review', 'pending_approval'))]"/>
+                <filter name="missing_segment" string="Sin segmento" domain="[('segment_id', '=', False)]"/>
+                <filter name="submitted_date" string="Fecha de envío" date="submitted_at"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="group_segment" string="Segmento" context="{'group_by': 'segment_id'}"/>
+                    <filter name="group_company" string="Compañía" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter name="group_country" string="País" context="{'group_by': 'country_id'}"/>
+                    <filter name="group_state_region" string="Estado/Provincia" context="{'group_by': 'state_id'}"/>
+                    <filter name="group_submitted_month" string="Mes de envío" context="{'group_by': 'submitted_at:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_distribution_client_kanban" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.kanban.clients</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="arch" type="xml">
+            <kanban string="Clientes distribuidores" default_group_by="state" create="false" quick_create="false" records_draggable="false" groups_draggable="false" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="can_purchase"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div class="fw-bold fs-5 text-break">
+                                <field name="legal_business_name"/>
+                            </div>
+                            <span t-if="record.state.raw_value == 'approved'" class="badge text-bg-success">Aprobado</span>
+                            <span t-elif="record.state.raw_value == 'pending_approval'" class="badge text-bg-primary">Pendiente</span>
+                            <span t-elif="record.state.raw_value == 'under_review'" class="badge text-bg-warning">En revisión</span>
+                            <span t-else="" class="badge text-bg-secondary">Sin perfil</span>
+                        </div>
+                        <div class="text-muted mb-2"><i class="fa fa-user me-1" title="Contacto"/><field name="partner_id"/></div>
+                        <div t-if="record.contact_email.raw_value" class="mb-1"><i class="fa fa-envelope-o me-2 text-muted" title="Correo"/><field name="contact_email"/></div>
+                        <div t-if="record.contact_phone.raw_value" class="mb-1"><i class="fa fa-phone me-2 text-muted" title="Teléfono"/><field name="contact_phone"/></div>
+                        <div t-if="record.city.raw_value or record.state_id.raw_value" class="mb-1">
+                            <i class="fa fa-map-marker me-2 text-muted" title="Ubicación"/><field name="city"/><t t-if="record.city.raw_value and record.state_id.raw_value">, </t><field name="state_id"/>
+                        </div>
+                        <div t-if="record.segment_id.raw_value" class="mt-2"><span class="text-muted">Segmento: </span><field name="segment_id"/></div>
+                        <footer class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                            <small t-if="record.submitted_at.raw_value" class="text-muted"><field name="submitted_at"/></small>
+                            <field name="activity_ids" widget="kanban_activity" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_distribution_client_list" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.list.clients</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="arch" type="xml">
+            <list string="Clientes distribuidores" create="false" duplicate="false" multi_edit="1"
+                  decoration-success="state == 'approved'"
+                  decoration-warning="state in ('under_review', 'pending_approval')"
+                  decoration-muted="state == 'no_profile'">
+                <field name="legal_business_name" string="Empresa"/>
+                <field name="partner_id" string="Contacto"/>
+                <field name="contact_email" optional="show"/>
+                <field name="contact_phone" optional="show"/>
+                <field name="city" optional="hide"/>
+                <field name="state_id" optional="hide"/>
+                <field name="country_id" optional="hide"/>
+                <field name="state" widget="badge"/>
+                <field name="segment_id" optional="show"/>
+                <field name="submitted_at" optional="show"/>
+                <field name="reviewed_at" optional="hide"/>
+                <field name="approved_at" optional="hide"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="activity_ids" widget="list_activity" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_distribution_client_graph" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.graph.clients</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="arch" type="xml">
+            <graph string="Solicitudes por estado" type="bar">
+                <field name="state"/>
+                <field name="request_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_distribution_client_pivot" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.pivot.clients</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de clientes distribuidores">
+                <field name="state" type="row"/>
+                <field name="segment_id" type="col"/>
+                <field name="request_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_distribution_clients_all" model="ir.actions.act_window">
+        <field name="name">Clientes distribuidores</field>
+        <field name="res_model">dreyes.distributor.profile</field>
+        <field name="view_mode">kanban,list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_distribution_client_search"/>
+        <field name="context">{'search_default_group_state': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavía no hay perfiles de distribuidores.</p>
+            <p>Los perfiles se crean automáticamente cuando un usuario del portal entra al sitio de distribución.</p>
+        </field>
+    </record>
+
+    <record id="action_distribution_clients_pending" model="ir.actions.act_window">
+        <field name="name">Solicitudes pendientes</field>
+        <field name="res_model">dreyes.distributor.profile</field>
+        <field name="view_mode">kanban,list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_distribution_client_search"/>
+        <field name="domain">[('state', 'in', ('under_review', 'pending_approval'))]</field>
+        <field name="context">{'search_default_group_state': 1}</field>
+    </record>
+
+    <record id="action_distribution_clients_analysis" model="ir.actions.act_window">
+        <field name="name">Análisis de clientes</field>
+        <field name="res_model">dreyes.distributor.profile</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="search_view_id" ref="view_distribution_client_search"/>
+    </record>
+
+    <record id="action_distribution_clients_all_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/><field name="view_mode">kanban</field><field name="view_id" ref="view_distribution_client_kanban"/><field name="act_window_id" ref="action_distribution_clients_all"/>
+    </record>
+    <record id="action_distribution_clients_all_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/><field name="view_mode">list</field><field name="view_id" ref="view_distribution_client_list"/><field name="act_window_id" ref="action_distribution_clients_all"/>
+    </record>
+    <record id="action_distribution_clients_all_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/><field name="view_mode">form</field><field name="view_id" ref="dreyes_dist.view_dreyes_distributor_profile_form"/><field name="act_window_id" ref="action_distribution_clients_all"/>
+    </record>
+    <record id="action_distribution_clients_all_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/><field name="view_mode">graph</field><field name="view_id" ref="view_distribution_client_graph"/><field name="act_window_id" ref="action_distribution_clients_all"/>
+    </record>
+    <record id="action_distribution_clients_all_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/><field name="view_mode">pivot</field><field name="view_id" ref="view_distribution_client_pivot"/><field name="act_window_id" ref="action_distribution_clients_all"/>
+    </record>
+
+    <record id="action_distribution_clients_pending_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/><field name="view_mode">kanban</field><field name="view_id" ref="view_distribution_client_kanban"/><field name="act_window_id" ref="action_distribution_clients_pending"/>
+    </record>
+    <record id="action_distribution_clients_pending_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/><field name="view_mode">list</field><field name="view_id" ref="view_distribution_client_list"/><field name="act_window_id" ref="action_distribution_clients_pending"/>
+    </record>
+    <record id="action_distribution_clients_pending_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/><field name="view_mode">form</field><field name="view_id" ref="dreyes_dist.view_dreyes_distributor_profile_form"/><field name="act_window_id" ref="action_distribution_clients_pending"/>
+    </record>
+    <record id="action_distribution_clients_pending_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/><field name="view_mode">graph</field><field name="view_id" ref="view_distribution_client_graph"/><field name="act_window_id" ref="action_distribution_clients_pending"/>
+    </record>
+    <record id="action_distribution_clients_pending_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/><field name="view_mode">pivot</field><field name="view_id" ref="view_distribution_client_pivot"/><field name="act_window_id" ref="action_distribution_clients_pending"/>
+    </record>
+</odoo>

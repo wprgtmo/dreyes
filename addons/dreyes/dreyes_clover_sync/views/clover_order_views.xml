@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_order_form_clover" model="ir.ui.view">
+        <field name="name">pos.order.form.clover</field><field name="model">pos.order</field><field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="inside"><group string="Clover" invisible="not clover_connector_id"><field name="clover_connector_id"/><field name="clover_order_id"/><field name="clover_sync_state" widget="badge"/><field name="clover_last_sync"/><field name="clover_error"/></group></xpath></field>
+    </record>
+    <record id="view_partner_form_clover" model="ir.ui.view">
+        <field name="name">res.partner.form.clover</field><field name="model">res.partner</field><field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml"><xpath expr="//field[@name='category_id']" position="after"><field name="clover_last_sync" readonly="1" groups="dreyes_clover_sync.group_clover_operator"/></xpath></field>
+    </record>
+    <record id="view_website_form_clover" model="ir.ui.view">
+        <field name="name">website.form.clover</field><field name="model">website</field><field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml"><xpath expr="//field[@name='company_id']" position="after"><field name="clover_connector_id" readonly="1" groups="dreyes_clover_sync.group_clover_operator"/></xpath></field>
+    </record>
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_distribution_clients_root"
+              name="Clientes distribuidores"
+              sequence="45"
+              groups="dreyes_dist.group_distribution_reviewer"
+              web_icon="dreyes_dist_clients,static/description/icon.png"/>
+    <menuitem id="menu_distribution_clients_pending" name="Solicitudes pendientes" parent="menu_distribution_clients_root" action="action_distribution_clients_pending" sequence="10"/>
+    <menuitem id="menu_distribution_clients_all" name="Todos los perfiles" parent="menu_distribution_clients_root" action="action_distribution_clients_all" sequence="20"/>
+    <menuitem id="menu_distribution_clients_segments" name="Segmentos de mercado" parent="menu_distribution_clients_root" action="dreyes_dist.action_dreyes_market_segments" sequence="30"/>
+    <menuitem id="menu_distribution_clients_analysis" name="Análisis" parent="menu_distribution_clients_root" action="action_distribution_clients_analysis" sequence="40"/>
+</odoo>
