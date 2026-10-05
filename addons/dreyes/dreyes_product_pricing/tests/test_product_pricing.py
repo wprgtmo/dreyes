@@ -7,6 +7,7 @@ from odoo import Command, fields
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 from odoo.tests.common import new_test_user
+from odoo.addons.dreyes_product_pricing.hooks import repair_category_paths
 
 
 @tagged("post_install", "-at_install")
@@ -258,6 +259,27 @@ class TestProductPricing(TransactionCase):
         self.pricelist.currency_id = currency
         expected = self.product.currency_id._convert(100.0, currency, self.env.company, self.today)
         self.assertEqual(self.page()["rows"][0]["price"], expected)
+
+    def test_upgrade_repairs_imported_category_paths_and_is_idempotent(self):
+        parent = self.env["product.category"].create({"name": "Pricing imported parent"})
+        self.category.parent_id = parent
+        rule = self.rule(applied_on="2_product_category", product_id=False, categ_id=parent.id)
+        self.env.flush_all()
+        self.env.cr.execute(
+            "UPDATE product_category SET parent_path = NULL WHERE id IN %s",
+            (tuple((parent | self.category).ids),),
+        )
+        self.env["product.category"].invalidate_model(["parent_path"])
+        with self.assertRaisesRegex(UserError, "categorías importadas"):
+            self.page()
+        self.assertEqual(repair_category_paths(self.env), 2)
+        self.assertEqual(parent.parent_path, "%s/" % parent.id)
+        self.assertEqual(self.category.parent_path, "%s/%s/" % (parent.id, self.category.id))
+        self.assertEqual(self.category.parent_id, parent)
+        row = self.page()["rows"][0]
+        self.assertEqual(row["rule_id"], rule.id)
+        self.assertEqual(row["price"], 80.0)
+        self.assertEqual(repair_category_paths(self.env), 0)
 
     def test_invalid_inputs(self):
         for quantity in (0, -1, float("nan"), float("inf"), "", True):

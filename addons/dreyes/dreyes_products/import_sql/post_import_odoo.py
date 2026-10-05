@@ -2,6 +2,7 @@
 
 Se ejecuta dentro de `odoo shell` y usa el entorno `env` ya disponible.
 Objetivos:
+- reconstruir las rutas jerarquicas de categorias usadas por las listas de precios
 - regenerar `image_1024`, `image_512`, etc. a partir de `image_1920`
 - verificar cobertura basica de productos, stock e imagenes del lote staged
 """
@@ -28,6 +29,16 @@ def _product_domain(staged_skus):
 
 
 DERIVED_IMAGE_FIELDS = ["image_1024", "image_512", "image_256", "image_128"]
+
+
+def rebuild_category_hierarchy():
+    Category = env["product.category"]
+    if any(category._has_cycle() for category in Category.search([])):
+        raise ValueError("El arbol de categorias contiene un ciclo; corrige los padres antes del postproceso.")
+    Category._parent_store_compute()
+    Category.invalidate_model(["parent_path"])
+    env.cr.commit()
+    print("category_hierarchy_rebuilt=True")
 
 
 def regenerate_image_variants(products):
@@ -95,6 +106,7 @@ def print_summary(products):
 
 
 def main():
+    rebuild_category_hierarchy()
     staged_skus = _staged_skus()
     if not staged_skus:
         print("No hay SKUs en stg_wix_catalog. Ejecuta 01_stage.sql antes del postproceso.")

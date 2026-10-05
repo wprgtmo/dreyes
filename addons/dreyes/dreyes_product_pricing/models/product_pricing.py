@@ -117,6 +117,8 @@ class ProductPricelist(models.Model):
     def _dreyes_price_rows(self, pricelist, products, quantity, date):
         Item = self.env["product.pricelist.item"]
         Item.check_access("read")
+        if any(not category.parent_path for category in products.mapped("categ_id")):
+            raise UserError(_("Hay categorías importadas con una jerarquía incompleta. Actualice el módulo DReyes Product Pricing para repararlas antes de consultar los precios."))
         prices = pricelist._compute_price_rule(products, quantity, date=date)
         rule_ids = [rule_id for _price, rule_id in prices.values() if rule_id]
         rules = Item.browse(rule_ids)

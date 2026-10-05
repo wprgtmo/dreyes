@@ -38,6 +38,18 @@ odoo -d <base> -i dreyes_product_pricing --stop-after-init --no-http \
 
 Si el catálogo fue importado directamente por SQL, sus categorías deben tener
 el árbol `parent_path` completo para que funcione el cálculo nativo de Odoo.
-Si falta, reconstruirlo con `env['product.category']._parent_store_compute()`
-desde `odoo shell` después de respaldar la base. La consulta de precios no
-modifica ni repara datos automáticamente.
+Desde la versión `18.0.1.0.1`, instalar o actualizar este módulo reconstruye
+las rutas faltantes mediante el método nativo de Odoo. Respaldar la base antes
+de actualizar. Las consultas de precios siguen siendo de solo lectura.
+
+Con el código actualizado en el servidor y Odoo detenido, ejecutar:
+
+```sh
+odoo -d dreyes -u dreyes_product_pricing --stop-after-init --no-http
+```
+
+Usar la configuración habitual del servidor para la conexión y el `addons_path`,
+y arrancar Odoo nuevamente al terminar la actualización.
+
+Si se importa otro lote después de actualizar, completar el postproceso de
+categorías o volver a ejecutar `repair_category_paths(env)` desde `odoo shell`.
