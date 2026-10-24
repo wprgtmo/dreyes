@@ -1,37 +1,37 @@
-#version: '3.8'
+name: dreyes19_runtime
 services:
-  web:
-    container_name: ${ODOO_CONTAINER_NAME}
-    image: ${ODOO_IMAGE}
-    depends_on:
-      - db
-    ports:
-      - "${ODOO_PORT}:8069"
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo
-      - ./addons:/mnt/extra-addons
-      - ./logs:/var/log/odoo
-    environment:
-      HOST: ${DB_HOST}
-      USER: ${DB_USER}
-      PASSWORD: ${DB_PASSWORD}      
-      CLOVER_TOKEN_ENCRYPTION_KEY: ${CLOVER_TOKEN_ENCRYPTION_KEY:-}
-    command: odoo -d dreyes -u dom_portal   
   db:
-    container_name: ${POSTGRES_CONTAINER_NAME}
-    image: ${POSTGRES_IMAGE}
-    restart: always
-    ports:
-      - "${POSTGRES_PORT}:5432"
+    image: postgres:16
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATA: ${PGDATA}
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     volumes:
-      - odoo-db-data:${PGDATA}
-
+      - db-data:/var/lib/postgresql/data
+  web:
+    image: odoo:19.0-20261015
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}
+      CLOVER_TOKEN_ENCRYPTION_KEY: ${CLOVER_TOKEN_ENCRYPTION_KEY:-}
+    ports:
+      - "127.0.0.1:${ODOO_HTTP_PORT:-8069}:8069"
+    volumes:
+      - ./:/mnt/local-addons:ro
+      - ./oca/web:/mnt/oca-web:ro
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - web-data:/var/lib/odoo
 volumes:
-  odoo-web-data:
-  odoo-db-data:
+  db-data:
+  web-data:

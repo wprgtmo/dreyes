@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="pwa_badge_head" inherit_id="web.layout" name="PWA badge head">
+        <xpath expr="//head" position="inside">
+            <t t-set="pwa_badge_head" t-value="env['ir.http'].sudo()._get_pwa_badge_head_data()" />
+            <link
+                t-if="pwa_badge_head.get('apple_touch_icon_url')"
+                rel="apple-touch-icon"
+                sizes="180x180"
+                t-att-href="pwa_badge_head['apple_touch_icon_url']"
+            />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta
+                name="apple-mobile-web-app-title"
+                t-att-content="pwa_badge_head['short_name']"
+            />
+            <meta
+                name="mobile-web-app-capable"
+                content="yes"
+            />
+            <meta
+                name="theme-color"
+                t-att-content="pwa_badge_head['theme_color']"
+            />
+        </xpath>
+    </template>
+</odoo>

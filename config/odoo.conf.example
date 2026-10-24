@@ -1,0 +1,8 @@
+[options]
+admin_passwd = CHANGE_ME_TO_A_LONG_RANDOM_MASTER_PASSWORD
+data_dir = /var/lib/odoo
+addons_path = /mnt/local-addons,/mnt/oca-web
+dbfilter = ^dreyes19_websites$
+list_db = True
+proxy_mode = False
+max_cron_threads = 0
