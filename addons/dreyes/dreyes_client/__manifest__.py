@@ -2,7 +2,7 @@
 {
     "name": "Dreyes Client",
     "summary": "Modernizacion Tabler del portal cliente nativo en /my/home.",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "author": "Wilfredo",
     "website": "https://dreyeslatinmarket,com",
     "category": "DReyes/Portal",

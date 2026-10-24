@@ -12,6 +12,12 @@ class DreyesClientPortal(CustomerPortal):
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
+        # /my/counters serializes every returned key as a DOM counter.
+        # Dashboard records and labels belong only to the initial HTML render,
+        # which calls this method with an empty counter list.
+        if counters:
+            return values
+
         partner = request.env.user.sudo().partner_id.commercial_partner_id
         sale_order_model = request.env["sale.order"].sudo()
         invoice_model = request.env["account.move"].sudo()
