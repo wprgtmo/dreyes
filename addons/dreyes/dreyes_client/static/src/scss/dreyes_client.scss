@@ -38,6 +38,36 @@
     color: #ffffff;
 }
 
+.dc-home-hero__main .card-body {
+    width: 100%;
+    padding: 1.5rem;
+}
+
+.dc-home-hero__title {
+    color: inherit;
+}
+
+.dc-home-hero > * {
+    min-width: 0;
+}
+
+.dc-portal-home .card-header {
+    padding: 1rem 1.25rem;
+}
+
+.dc-portal-home .card-title {
+    margin: 0;
+}
+
+.dc-portal-home .card-table > :not(caption) > * > * {
+    padding: 0.85rem 1.25rem;
+}
+
+.dc-doc-card__count {
+    color: #066fd1;
+    background: #e9f2fb;
+}
+
 .dc-home-hero__eyebrow {
     margin-bottom: 0.65rem;
     font-size: 0.8rem;
@@ -91,6 +121,15 @@
 }
 
 .dc-avatar {
+    width: 5rem;
+    height: 5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 0.5rem;
+    font-size: 2rem;
+    color: #ffffff;
     background: linear-gradient(135deg, #1d4ed8 0%, #38bdf8 100%);
 }
 
@@ -114,6 +153,7 @@
 }
 
 .dc-profile-list strong {
+    overflow-wrap: anywhere;
     color: #0f172a;
     font-size: 0.95rem;
 }

@@ -3,9 +3,7 @@
     <template id="client_assets" inherit_id="web.frontend_layout" priority="20">
         <xpath expr="//head" position="inside">
             <t t-if="request and request.httprequest and request.httprequest.path.startswith('/my')">
-                <link rel="stylesheet" href="/dreyes_client/static/lib/tabler/css/tabler.min.css"/>
                 <link rel="stylesheet" href="/dreyes_client/static/lib/tabler-icons/css/tabler-icons.min.css"/>
-                <script type="text/javascript" src="/dreyes_client/static/lib/tabler/js/tabler.min.js"/>
             </t>
         </xpath>
     </template>
@@ -133,15 +131,18 @@
 
     <template id="portal_docs_entry_modern" inherit_id="portal.portal_docs_entry" priority="30">
         <xpath expr="//a[@t-att-href='url']" position="attributes">
-            <attribute name="class">card card-link dc-doc-card h-100 text-decoration-none</attribute>
+            <attribute name="t-attf-class" add="card card-link dc-doc-card" separator=" "/>
         </xpath>
         <xpath expr="//a[@t-att-href='url']/*[1]" position="before">
             <div class="dc-doc-card__top">
                 <span class="dc-doc-card__icon">
                     <i class="ti ti-layout-grid-add"/>
                 </span>
-                <span t-if="placeholder_count" class="badge bg-primary-lt rounded-pill" t-att-data-placeholder_count="placeholder_count"/>
             </div>
+        </xpath>
+        <!-- Keep one counter per card so native RPC batching receives unique names. -->
+        <xpath expr="//span[@t-att-data-placeholder_count='placeholder_count']" position="attributes">
+            <attribute name="t-att-class">'badge rounded-pill dc-doc-card__count'</attribute>
         </xpath>
     </template>
 </odoo>
