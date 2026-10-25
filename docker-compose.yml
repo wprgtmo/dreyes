@@ -30,6 +30,7 @@ services:
     volumes:
       - ./addons:/mnt/addons:ro
       - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./log:/var/log/odoo
       - web-data:/var/lib/odoo
 volumes:
   db-data:
