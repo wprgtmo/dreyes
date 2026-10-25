@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 import base64
 import json
+import io
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from lxml import html
+from PIL import Image
+from werkzeug.datastructures import FileStorage
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
+from ..controllers.main import DreyesDistProfile
 from ..hooks import migrate_existing_profiles
 
 
@@ -55,6 +63,62 @@ class TestDistributionProfile(TransactionCase):
             "mimetype": attachment.mimetype,
         })
         cls.profile.current_permit_id = permit
+
+    def _save_portal_address(self, logo=None, **post):
+        controller = DreyesDistProfile()
+        self.profile.state = "no_profile"
+        mock_request = SimpleNamespace(
+            env=self.env, httprequest=SimpleNamespace(files={"company_logo": logo} if logo else {}),
+        )
+        with (
+            patch("odoo.http.request", mock_request),
+            patch("odoo.addons.dreyes_dist.controllers.main.request", mock_request),
+            patch.object(controller, "_read_upload", return_value=False),
+        ):
+            controller._save(self.profile, post)
+
+    def test_portal_uploads_and_keeps_company_logo(self):
+        image = io.BytesIO()
+        Image.new("RGB", (16, 16), "red").save(image, format="PNG")
+        image.seek(0)
+        logo = FileStorage(stream=image, filename="company.png", content_type="image/png")
+        self._save_portal_address(logo=logo, phone="5125550100")
+        saved_logo = self.profile.company_logo
+        self.assertTrue(saved_logo)
+        with Image.open(io.BytesIO(base64.b64decode(saved_logo))) as saved:
+            self.assertEqual(saved.size, (16, 16))
+        self.assertEqual(self.partner.phone, "5125550100")
+        self._save_portal_address()
+        self.assertEqual(self.profile.company_logo, saved_logo)
+
+    def test_portal_rejects_invalid_company_logo_before_saving(self):
+        logo = FileStorage(stream=io.BytesIO(b"not an image"), filename="company.png")
+        original_street = self.partner.street
+        with self.assertRaisesRegex(UserError, "imagen válida"):
+            self._save_portal_address(logo=logo, street="Must not be saved")
+        self.assertEqual(self.partner.street, original_street)
+        self.assertFalse(self.profile.company_logo)
+
+    def test_portal_country_is_always_usa(self):
+        self._save_portal_address(
+            country_id=str(self.env.ref("base.mx").id),
+            state_id=str(self.env.ref("base.state_us_43").id),
+        )
+        self.assertEqual(self.partner.country_id, self.env.ref("base.us"))
+        self.assertEqual(self.partner.state_id, self.env.ref("base.state_us_43"))
+
+    def test_portal_rejects_non_usa_state_before_saving(self):
+        state = self.env["res.country.state"].search([("country_id.code", "=", "MX")], limit=1)
+        self.assertTrue(state)
+        original_street = self.partner.street
+        with self.assertRaisesRegex(UserError, "estado de USA"):
+            self._save_portal_address(state_id=str(state.id), street="Must not be saved")
+        self.assertEqual(self.partner.street, original_street)
+
+    def test_portal_blank_state_still_saves_usa(self):
+        self._save_portal_address(state_id="")
+        self.assertEqual(self.partner.country_id, self.env.ref("base.us"))
+        self.assertFalse(self.partner.state_id)
 
     def test_review_and_approval_activate_segment_pricelist(self):
         profile = self.profile.with_user(self.reviewer)
@@ -172,7 +236,7 @@ class TestDistributionPortal(HttpCase):
         cls.http_headers = {}
         cls.login = "portal-http-dist-test@example.com"
         cls.password = "portal-http-dist-test"
-        partner = cls.env["res.partner"].create({"name": "Portal HTTP Test", "email": cls.login})
+        partner = cls.env["res.partner"].create({"name": "Portal HTTP Test", "email": cls.login, "zip": "78701"})
         cls.env["res.users"].with_context(no_reset_password=True).create({
             "name": partner.name, "login": cls.login, "password": cls.password, "partner_id": partner.id,
             "company_id": cls.website.company_id.id,
@@ -200,6 +264,9 @@ class TestDistributionPortal(HttpCase):
         profile_response = self.url_open("/my/distributor-profile", headers=self.http_headers)
         self.assertEqual(profile_response.status_code, 200)
         self.assertIn("Guardar borrador", profile_response.text)
+        document = html.fromstring(profile_response.content)
+        self.assertEqual(document.xpath("//input[@name='zip']/@value"), ["78701"])
+        self.assertFalse(document.xpath("//select[@name='phone_code']"))
         self.assertIn("Sin perfil", profile_response.text)
         shop_response = self.url_open("/shop", headers=self.http_headers)
         self.assertEqual(shop_response.status_code, 200)

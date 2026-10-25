@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import base64
+import io
 import re
 
+from PIL import Image, UnidentifiedImageError
 from werkzeug.utils import secure_filename
 
 from odoo import _, fields, http
@@ -12,8 +14,10 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.cart import Cart
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import content_disposition, request
+from odoo.tools.image import image_process
 
 
+MAX_COMPANY_LOGO_SIZE = 5 * 1024 * 1024
 MAX_TAX_PERMIT_SIZE = 15 * 1024 * 1024
 ALLOWED_TAX_PERMIT_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 PROFILE_URL = "/my/distributor-profile"
@@ -65,13 +69,9 @@ class DreyesDistProfile(http.Controller):
     def _profile(self):
         return request.website._dreyes_profile_for_partner(request.env.user.partner_id, create=True)
 
-    def _split_phone(self, phone):
-        match = re.match(r"^\+(\d+)\s+(.+)$", phone or "")
-        return (match.group(1), match.group(2)) if match else ("1", phone or "")
-
     def _values(self, profile, error=None):
         partner = profile.partner_id
-        phone_code, phone = self._split_phone(partner.phone)
+        country = request.env.ref("base.us")
         state_label = dict(profile._fields["state"].selection).get(profile.state)
         return {
             "profile": profile,
@@ -83,12 +83,11 @@ class DreyesDistProfile(http.Controller):
             "first_name": partner.first_name or "", "last_name": partner.last_name or "",
             "email": partner.email or request.env.user.login or "",
             "street": partner.street or "", "street2": partner.street2 or "",
-            "city": partner.city or "", "state_id": str(partner.state_id.id) if partner.state_id else "",
-            "zip": partner.zip or "", "country_id": str(partner.country_id.id) if partner.country_id else "",
-            "phone_code": phone_code, "phone": phone, "join_community": partner.join_community,
-            "countries": request.env["res.country"].sudo().search([]),
-            "states": request.env["res.country.state"].sudo().search([]),
-            "phone_countries": request.env["res.country"].sudo().search([("phone_code", "!=", False)]),
+            "city": partner.city or "", "state_id": str(partner.state_id.id) if partner.state_id.country_id == country else "",
+            "postal_code": partner.zip or "",
+            "phone": partner.phone or "", "join_community": partner.join_community,
+            "company_logo": profile.company_logo,
+            "states": request.env["res.country.state"].sudo().search([("country_id", "=", country.id)]),
             "error": error,
         }
 
@@ -118,8 +117,26 @@ class DreyesDistProfile(http.Controller):
             raise UserError(_("El tax permit debe pesar 15 MB o menos."))
         return {"filename": filename, "data": data, "mimetype": upload.mimetype}
 
+    def _read_company_logo(self):
+        upload = request.httprequest.files.get("company_logo")
+        if not upload or not upload.filename:
+            return False
+        data = upload.read(MAX_COMPANY_LOGO_SIZE + 1)
+        if len(data) > MAX_COMPANY_LOGO_SIZE:
+            raise UserError(_("El logo debe pesar 5 MB o menos."))
+        try:
+            image = Image.open(io.BytesIO(data))
+            if image.format not in {"PNG", "JPEG", "WEBP"}:
+                raise UserError(_("El logo debe ser una imagen PNG, JPG o WEBP."))
+            image.close()
+            normalized = image_process(data, size=(512, 512), verify_resolution=True, output_format="PNG")
+        except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as exc:
+            raise UserError(_("Seleccione una imagen válida para el logo.")) from exc
+        return base64.b64encode(normalized)
+
     def _save(self, profile, post, submit=False):
         upload = self._read_upload()
+        company_logo = self._read_company_logo()
         ein_value = post.get("ein")
         ein = profile.ein if not (ein_value or "").strip() and profile.ein else self._normalized_digits(
             ein_value, 9, _("EIN"), required=submit,
@@ -127,9 +144,12 @@ class DreyesDistProfile(http.Controller):
         permit_number = self._normalized_digits(
             post.get("tax_permit_number"), 11, _("Número de permiso de Texas"), required=submit,
         )
-        country_id = int(post["country_id"]) if post.get("country_id") else False
+        country = request.env.ref("base.us")
         state_id = int(post["state_id"]) if post.get("state_id") else False
-        phone_code = re.sub(r"\D", "", post.get("phone_code") or "")
+        if state_id:
+            state = request.env["res.country.state"].sudo().browse(state_id).exists()
+            if not state or state.country_id != country:
+                raise UserError(_("Seleccione un estado de USA."))
         phone_number = (post.get("phone") or "").strip()
         partner_values = {
             "first_name": (post.get("first_name") or "").strip(),
@@ -137,16 +157,19 @@ class DreyesDistProfile(http.Controller):
             "email": (post.get("email") or "").strip(),
             "street": (post.get("street") or "").strip(), "street2": (post.get("street2") or "").strip(),
             "city": (post.get("city") or "").strip(), "state_id": state_id,
-            "zip": (post.get("zip") or "").strip(), "country_id": country_id,
-            "phone": (f"+{phone_code} {phone_number}" if phone_code else phone_number).strip(),
+            "zip": (post.get("zip") or "").strip(), "country_id": country.id,
+            "phone": phone_number,
             "join_community": bool(post.get("join_community")),
         }
         old_state = profile.state
         profile.partner_id.sudo().write(partner_values)
-        profile.sudo().write({
+        profile_values = {
             "legal_business_name": (post.get("legal_business_name") or "").strip(),
             "ein": ein, "tax_permit_number": permit_number,
-        })
+        }
+        if company_logo:
+            profile_values["company_logo"] = company_logo
+        profile.sudo().write(profile_values)
         if upload:
             attachment = request.env["ir.attachment"].sudo().create({
                 "name": upload["filename"], "datas": base64.b64encode(upload["data"]),

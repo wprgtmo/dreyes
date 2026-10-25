@@ -79,6 +79,7 @@ class DreyesDistributorProfile(models.Model):
         domain="[('company_id', '=', company_id), ('active', '=', True)]",
     )
     legal_business_name = fields.Char(tracking=True)
+    company_logo = fields.Image(string="Logo de la empresa", max_width=512, max_height=512, attachment=True)
     ein = fields.Char(string="EIN", groups="dreyes_dist.group_distribution_reviewer")
     tax_permit_number = fields.Char(string="Número de permiso de Texas", tracking=True)
     permit_ids = fields.One2many("dreyes.distributor.permit", "profile_id", string="Historial de permisos")

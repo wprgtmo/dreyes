@@ -2,7 +2,7 @@
 {
     "name": "Dreyes Dist",
     "summary": "Formulario extendido posterior al registro y login de distribuidores.",
-    "version": "19.0.2.0.1",
+    "version": "19.0.2.0.2",
     "author": "Wilfredo",
     "website": "https://dreyeslatinmarket,com",
     "category": "DReyes/Portal",
