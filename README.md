@@ -12,7 +12,7 @@ se desarrollan en `19.0`; no se fusiona esta rama completa en `18.0`.
 
 ## Módulos
 
-Los módulos están en la raíz del repositorio, siguiendo la estructura de OCA.
+Los módulos locales están en `addons/`, siguiendo la estructura de OCA.
 
 | Módulo | Función |
 | --- | --- |
@@ -24,7 +24,7 @@ Los módulos están en la raíz del repositorio, siguiendo la estructura de OCA.
 | `dreyes_clover_sync` | Integración de catálogo, inventario y pedidos con Clover |
 | `pwa_badge` | Contadores e iconos de la aplicación PWA |
 
-OCA Web se incorpora como submódulo en `oca/web`, en su rama `19.0` y fijado
+OCA Web se incorpora como submódulo en `addons/oca/web`, en su rama `19.0` y fijado
 al commit probado `884c09e3ed1b0b8d651e9827b84d3d77a7d98ff4`.
 Se utilizan `web_responsive` y `web_pwa_customize`.
 

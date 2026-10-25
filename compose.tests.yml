@@ -23,12 +23,11 @@ services:
       USER: odoo
       PASSWORD: isolated-test-database
     volumes:
-      - ./:/mnt/local-addons:ro
-      - ./oca/web:/mnt/oca-web:ro
+      - ./addons:/mnt/addons:ro
       - test-web:/var/lib/odoo
     command:
       - odoo
-      - --addons-path=/mnt/local-addons,/mnt/oca-web
+      - --addons-path=/mnt/addons,/mnt/addons/oca/web
       - -d
       - dreyes19_repository_tests
       - -i
