@@ -238,3 +238,24 @@
         flex-direction: column;
     }
 }
+
+// Only the Portal del cliente / Mi cuenta card uses white and black.
+.dc-home-hero__main {
+    background: #ffffff;
+    color: #000000;
+
+    .card-body,
+    .dc-home-hero__eyebrow,
+    .dc-home-hero__title,
+    .dc-home-hero__copy,
+    .dc-stat-chip__label,
+    .dc-stat-chip strong {
+        color: #000000;
+        opacity: 1;
+    }
+
+    .dc-stat-chip {
+        background: #ffffff;
+        border-color: #dedede;
+    }
+}
