@@ -165,7 +165,9 @@ class DreyesDistributorProfile(models.Model):
 
     def _reviewer_emails(self):
         group = self.env.ref("dreyes_dist.group_distribution_reviewer")
-        return group.users.filtered(lambda u: self.company_id in u.company_ids).mapped("partner_id.email")
+        return group.all_user_ids.filtered(
+            lambda user: user.active and self.company_id in user.company_ids
+        ).mapped("partner_id.email")
 
     def notify_reviewers(self, subject, message):
         for profile in self:

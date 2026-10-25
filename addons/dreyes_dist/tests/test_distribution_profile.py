@@ -64,9 +64,9 @@ class TestDistributionProfile(TransactionCase):
         })
         cls.profile.current_permit_id = permit
 
-    def _save_portal_address(self, logo=None, **post):
+    def _save_portal_address(self, logo=None, profile_state="no_profile", **post):
         controller = DreyesDistProfile()
-        self.profile.state = "no_profile"
+        self.profile.state = profile_state
         mock_request = SimpleNamespace(
             env=self.env, httprequest=SimpleNamespace(files={"company_logo": logo} if logo else {}),
         )
@@ -98,6 +98,28 @@ class TestDistributionProfile(TransactionCase):
             self._save_portal_address(logo=logo, street="Must not be saved")
         self.assertEqual(self.partner.street, original_street)
         self.assertFalse(self.profile.company_logo)
+
+    def test_saving_profile_under_review_queues_reviewer_notification(self):
+        previous = self.env["mail.mail"].search([])
+        self._save_portal_address(profile_state="under_review", street="Updated address")
+        notification = self.env["mail.mail"].search([]) - previous
+        self.assertTrue(notification)
+        self.assertIn(self.reviewer.email, ",".join(notification.mapped("email_to")))
+        self.assertEqual(self.partner.street, "Updated address")
+
+    def test_reviewer_notifications_include_inherited_group_members(self):
+        group = self.env["res.groups"].create({
+            "name": "Inherited Distribution Reviewers",
+            "implied_ids": [(4, self.env.ref("dreyes_dist.group_distribution_reviewer").id)],
+        })
+        user = self.env["res.users"].with_context(no_reset_password=True).create({
+            "name": "Inherited reviewer", "login": "inherited-reviewer@example.com",
+            "email": "inherited-reviewer@example.com", "company_id": self.company.id,
+            "company_ids": [(6, 0, [self.company.id])], "group_ids": [(6, 0, group.ids)],
+        })
+        self.assertIn(user.email, self.profile._reviewer_emails())
+        user.active = False
+        self.assertNotIn(user.email, self.profile._reviewer_emails())
 
     def test_portal_country_is_always_usa(self):
         self._save_portal_address(
