@@ -65,15 +65,14 @@
 
 .sd_profile_page {
     min-height: 100vh;
-    background: var(--dreyes-auth-bg);
+    background: #ffffff;
 }
 
 .sd_profile_form_shell {
     max-width: 720px;
     padding: 34px;
-    border-radius: 8px;
     background: #ffffff;
-    box-shadow: var(--dreyes-shadow);
+    box-shadow: none;
 }
 
 .sd_profile_title {
@@ -100,5 +99,36 @@
 
     .sd_phone_row {
         grid-template-columns: 1fr;
+    }
+}
+
+// Keep the profile and its navigation white without changing other portal pages.
+.sd_distributor_profile_page {
+    --dreyes-auth-bg: #ffffff;
+    background: #ffffff;
+
+    #wrapwrap,
+    #wrapwrap > main,
+    .o_portal_wrap {
+        background: #ffffff !important;
+    }
+
+    .sd_profile_breadcrumbs {
+        max-width: 720px;
+        padding: 0 34px 12px;
+        background: #ffffff;
+        font-size: 0.9rem;
+
+        .breadcrumb {
+            padding: 0;
+            background: #ffffff;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .sd_profile_breadcrumbs {
+            padding-right: 18px;
+            padding-left: 18px;
+        }
     }
 }
