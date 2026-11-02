@@ -36,7 +36,8 @@
                 <div class="dc-home-profile card">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="avatar avatar-xl dc-avatar">
+                            <img t-if="dreyes_client_logo" t-att-src="image_data_uri(dreyes_client_logo)" t-att-alt="'Logo de %s' % (dreyes_client_partner.name or request.env.user.name)" class="avatar avatar-xl dc-avatar dc-avatar--logo"/>
+                            <div t-else="" class="avatar avatar-xl dc-avatar">
                                 <t t-esc="(dreyes_client_partner.name or request.env.user.name or 'C')[:1]"/>
                             </div>
                             <div>

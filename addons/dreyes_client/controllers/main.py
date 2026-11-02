@@ -19,6 +19,9 @@ class DreyesClientPortal(CustomerPortal):
             return values
 
         partner = request.env.user.sudo().partner_id.commercial_partner_id
+        profile_getter = getattr(request.website, "_dreyes_current_profile", None)
+        profile = profile_getter(create=False) if profile_getter else False
+        company_logo = profile.company_logo if profile else False
         sale_order_model = request.env["sale.order"].sudo()
         invoice_model = request.env["account.move"].sudo()
 
@@ -38,6 +41,7 @@ class DreyesClientPortal(CustomerPortal):
 
         values.update({
             "dreyes_client_partner": partner,
+            "dreyes_client_logo": company_logo,
             "dreyes_client_recent_orders": recent_orders,
             "dreyes_client_recent_invoices": recent_invoices,
             "dreyes_client_total_sales_text": self._format_currency(company_currency, sum(recent_orders.mapped("amount_total"))),
