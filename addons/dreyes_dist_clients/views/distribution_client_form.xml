@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_distribution_client_form_backend" model="ir.ui.view">
+        <field name="name">dreyes.distributor.profile.form.clients.backend</field>
+        <field name="model">dreyes.distributor.profile</field>
+        <field name="inherit_id" ref="dreyes_dist.view_dreyes_distributor_profile_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='current_permit_id']" position="after">
+                <field name="tax_permit_filename" invisible="1"/>
+                <field name="tax_permit_file" filename="tax_permit_filename" readonly="1"/>
+                <button name="action_upload_tax_permit" type="object" string="Subir / reemplazar tax permit"
+                        class="btn-primary" groups="dreyes_dist.group_distribution_reviewer"/>
+            </xpath>
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_send_to_review" type="object" string="Pasar a revisión"
+                        groups="dreyes_dist.group_distribution_reviewer"
+                        invisible="state == 'under_review'"
+                        confirm="El cliente quedará en revisión y no podrá comprar hasta ser aprobado nuevamente."/>
+                <button name="action_reset_profile" type="object" string="Volver a sin perfil"
+                        groups="dreyes_dist.group_distribution_reviewer"
+                        invisible="state == 'no_profile'"
+                        confirm="Se reiniciará la revisión y se suspenderá el acceso de compra del cliente. Sus datos se conservarán."/>
+            </xpath>
+            <xpath expr="//header/field[@name='state']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//group[field[@name='ein']]" position="before">
+                <group string="Datos del cliente">
+                    <group>
+                        <field name="contact_first_name"/>
+                        <field name="contact_last_name"/>
+                        <field name="contact_email" widget="email"/>
+                        <field name="contact_phone" widget="phone"/>
+                    </group>
+                    <group>
+                        <field name="street"/>
+                        <field name="street2"/>
+                        <field name="city"/>
+                        <field name="country_id"/>
+                        <field name="state_id" domain="[('country_id', '=', country_id)]"/>
+                        <field name="zip"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='submitted_at']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='submitted_by_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='reviewed_at']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='reviewed_by_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='approved_at']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='approved_by_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_distribution_client_permit_upload_form" model="ir.ui.view">
+        <field name="name">dreyes.distributor.permit.upload.form</field>
+        <field name="model">dreyes.distributor.permit.upload</field>
+        <field name="arch" type="xml">
+            <form string="Subir tax permit">
+                <group>
+                    <field name="profile_id"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="file" filename="filename" options="{'accepted_file_extensions': '.pdf,.jpg,.jpeg,.png'}"/>
+                </group>
+                <p>PDF, JPG, JPEG o PNG, hasta 15 MB. Se conservarán las versiones anteriores. Si el cliente estaba aprobado o pendiente de aprobación, volverá a revisión.</p>
+                <footer>
+                    <button name="action_upload" type="object" string="Guardar tax permit" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

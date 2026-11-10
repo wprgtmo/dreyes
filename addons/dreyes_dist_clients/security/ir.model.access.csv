@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_distribution_permit_upload_reviewer,Tax permit upload reviewer,model_dreyes_distributor_permit_upload,dreyes_dist.group_distribution_reviewer,1,1,1,1
